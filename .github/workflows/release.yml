@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test
+        run: cargo test --all-targets --locked
+      - name: Build
+        run: cargo build --release --locked
+      - name: Package and checksum
+        shell: bash
+        run: |
+          mkdir -p dist
+          archive="preagent-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}.tar.gz"
+          exe="preagent"
+          if [[ "$RUNNER_OS" == 'Windows' ]]; then exe='preagent.exe'; fi
+          tar -czf "dist/$archive" -C target/release "$exe"
+          (cd dist && if command -v sha256sum >/dev/null 2>&1; then sha256sum "$archive" > "$archive.sha256"; else shasum -a 256 "$archive" > "$archive.sha256"; fi)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preagent-${{ matrix.os }}
+          path: dist/*
+          if-no-files-found: error
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: preagent-*
+          path: dist
+          merge-multiple: true
+      - name: Publish on GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes

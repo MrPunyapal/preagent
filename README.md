@@ -123,3 +123,14 @@ release builds on Windows, Linux and macOS.
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).
+
+
+## CI binaries and releases
+
+Every successful main-branch CI run uploads native Windows, Linux, and macOS
+executables under Actions artifacts. Choose the artifact matching your OS,
+extract it, and run preagent --help or preagent doctor.
+
+Versioned releases are built from an explicitly pushed v-prefixed Git tag.
+Each release contains per-platform archives and SHA-256 checksums; the release
+workflow never needs API keys or a paid inference service.

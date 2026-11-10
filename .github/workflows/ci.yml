@@ -30,3 +30,11 @@ jobs:
         run: cargo run --locked -- eval --json
       - name: Build
         run: cargo build --release --locked
+      - name: Upload development binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: preagent-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            target/release/preagent
+            target/release/preagent.exe
+          if-no-files-found: error
