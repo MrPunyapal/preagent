@@ -1,6 +1,7 @@
 mod agent;
 mod cli;
 mod context;
+mod evaluation;
 mod router;
 
 use cli::{Action, Options};
@@ -36,6 +37,20 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Action::Run(options) => run(options),
+        Action::Eval { json } => match evaluation::evaluate_builtin() {
+            Ok(report) => {
+                if json {
+                    println!("{}", report.to_json());
+                } else {
+                    println!("{}", report.to_text());
+                }
+                ExitCode::SUCCESS
+            }
+            Err(message) => {
+                eprintln!("preagent: benchmark data invalid: {message}");
+                ExitCode::FAILURE
+            }
+        },
     }
 }
 

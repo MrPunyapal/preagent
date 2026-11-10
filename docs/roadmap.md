@@ -16,7 +16,7 @@ pass through a shell; unsupported options fail clearly.
 
 ## Milestone 2: Evaluation harness
 
-- Versioned public coding-task corpus with held-out tasks.
+- Extend the existing labeled routing smoke corpus with independently held-out tasks.
 - Compare agent defaults, rules-only routing, candidate SLM, and hybrid.
 - Track task correctness, prompt intent, user overrides, CPU/RAM and latency.
 - Report uncertainty, hardware details and reproducibility.

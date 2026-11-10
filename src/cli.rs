@@ -16,6 +16,7 @@ pub enum Action {
     Version,
     Route(Options),
     Run(Options),
+    Eval { json: bool },
 }
 
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
@@ -24,12 +25,14 @@ USAGE
     preagent route [--json] [--no-git] <prompt>
     preagent run [--dry-run] [--oss] [--local-provider ollama|lmstudio]
                  [--model NAME] [--effort LEVEL] [--no-git] <prompt>
+    preagent eval [--json]
     preagent --help
     preagent --version
 
 COMMANDS
     route    Classify a prompt locally without calling an AI service.
     run      Start Codex with the ORIGINAL prompt; no automatic model override.
+    eval     Score the built-in, labeled routing smoke corpus (no AI calls).
 
 OPTIONS
     --json             Machine-readable route (route only).
@@ -54,8 +57,20 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
     match command.as_str() {
         "-h" | "--help" | "help" => return Ok(Action::Help),
         "-V" | "--version" | "version" => return Ok(Action::Version),
-        "route" | "run" => {}
+        "route" | "run" | "eval" => {}
         _ => return Err(format!("unknown command '{command}'")),
+    }
+
+    if command == "eval" {
+        let mut json = false;
+        for option in args {
+            if option == "--json" {
+                json = true;
+            } else {
+                return Err(format!("unknown option '{option}' for eval"));
+            }
+        }
+        return Ok(Action::Eval { json });
     }
 
     let is_run = command == "run";
@@ -120,6 +135,13 @@ mod tests {
 
     fn parse_words(words: &[&str]) -> Result<Action, String> {
         parse(words.iter().map(|s| (*s).to_string()))
+    }
+
+    #[test]
+    fn eval_has_no_side_effects_or_prompt() {
+        assert_eq!(parse_words(&["eval"]).unwrap(), Action::Eval { json: false });
+        assert_eq!(parse_words(&["eval", "--json"]).unwrap(), Action::Eval { json: true });
+        assert!(parse_words(&["eval", "--model", "foo"]).is_err());
     }
 
     #[test]

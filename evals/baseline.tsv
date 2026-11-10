@@ -1,0 +1,46 @@
+# id<TAB>expected_tier<TAB>prompt — human-labeled smoke checks, not outcome benchmark
+docs-typo	simple	Fix typo in README
+docs-spelling	simple	Correct spelling in documentation
+docs-title	simple	Update README heading
+docs-whitespace	simple	Format markdown whitespace
+docs-wording	simple	Improve documentation wording
+docs-comment	simple	Change a comment in README
+docs-summary	simple	Summarize README
+docs-author	simple	Update author attribution in README
+docs-contest	simple	Contest winners are listed in README
+general-explain	simple	Explain the code structure
+general-options	simple	List command options
+general-config	simple	Explain how to configure the project
+feature-profile	standard	Add profile feature
+feature-settings	standard	Implement settings page
+feature-account	standard	Create account preferences UI
+feature-navigation	standard	Build navigation component
+feature-parser	standard	Create configuration parser
+feature-cli	standard	Add CLI help
+feature-export	standard	Implement offline export
+feature-retry	standard	Add retry logic for network failures
+bug-pagination	standard	Fix pagination bug
+bug-webhook	standard	Debug failed webhook delivery
+bug-api	standard	Fix API response shape
+bug-repair	standard	Repair broken error handling
+bug-cache	standard	Resolve cache regression
+refactor-handlers	standard	Refactor API handlers
+refactor-controller	standard	Refactoring one controller
+tests-validator	standard	Add test coverage for validators
+tests-sort	standard	Write unit tests for sorting
+tests-parser	standard	Create parser tests
+security-auth	complex	Fix authentication redirect bug
+security-audit	complex	Audit security vulnerabilities in dependencies
+security-permissions	complex	Fix critical permissions issue
+security-cve	complex	Audit CVE exposure
+security-payment	complex	Review payment processing security
+architecture-redesign	complex	Redesign the architecture
+architecture-distributed	complex	Plan distributed job queue architecture
+architecture-migration	complex	Migrate billing database schema
+concurrency-crash	complex	Fix intermittent concurrency crash
+concurrency-queue	complex	Implement concurrency safe worker queue
+scope-refactor	complex	Refactor entire codebase
+scope-modules	complex	Implement multiple modules end-to-end
+scope-debug	complex	Debug deployment failure across the project
+production-payment	complex	Analyze production payment reconciliation issues
+production-data	complex	Repair data loss regression

@@ -26,5 +26,7 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Tests
         run: cargo test --all-targets --locked
+      - name: Evaluate routing smoke corpus
+        run: cargo run --locked -- eval --json
       - name: Build
         run: cargo build --release --locked

@@ -30,6 +30,7 @@ Classify a request with no AI service:
 
     cargo run -- route "Fix authentication redirect"
     cargo run -- route --no-git --json "Fix README typo"
+    cargo run -- eval
 
 Preview the Codex command without launching it:
 
@@ -63,6 +64,15 @@ disable Git inspection.
 
 Heuristics are not calibrated confidence scores; please do not treat the
 output as a verified measure of model capability.
+
+## Routing smoke corpus
+
+Run `preagent eval` to classify the checked-in labeled scenarios in
+`evals/baseline.tsv`. The report includes per-tier accuracy and mismatches.
+The initial labels are human-authored expectations, not independently proven
+best model choices. This is a **regression smoke corpus**, not evidence that
+any paid model or local SLM will solve the corresponding coding tasks. We will
+use separate held-out tasks for future comparative benchmarks.
 
 ## Roadmap
 
