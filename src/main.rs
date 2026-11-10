@@ -3,6 +3,7 @@ mod cli;
 mod context;
 mod evaluation;
 mod router;
+mod slm;
 
 use cli::{Action, Options};
 use std::process::ExitCode;
@@ -29,10 +30,48 @@ fn main() -> ExitCode {
         Action::Route(options) => {
             let ctx = context::discover(!options.no_git);
             let decision = router::classify(&options.prompt, &ctx);
+            let mut status = "not_requested";
+            let mut suggested = None;
+            let mut fallback = None;
+            if let Some(model) = options.slm.as_deref() {
+                if options.slm_always || decision.uncertain {
+                    match slm::classify(&options.prompt, model) {
+                        Ok(tier) => {
+                            suggested = Some(tier);
+                            status = "evaluated";
+                        }
+                        Err(error) => {
+                            fallback = Some(error);
+                            status = "unavailable";
+                        }
+                    }
+                } else {
+                    status = "skipped_confident_rules";
+                }
+            }
+            let recommended = suggested
+                .map(|tier| slm::safer_tier(decision.tier, tier))
+                .unwrap_or(decision.tier);
             if options.json {
-                println!("{}", decision.to_json());
+                let baseline = decision.to_json();
+                let prefix = baseline.strip_suffix('}').expect("JSON object");
+                let slm_tier = suggested
+                    .map(|tier| format!("\"{}\"", tier.as_str()))
+                    .unwrap_or_else(|| "null".to_string());
+                println!(
+                    "{prefix},\"slm_status\":\"{status}\",\"slm_tier\":{slm_tier},\"recommended_tier\":\"{}\"}}",
+                    recommended.as_str()
+                );
             } else {
                 println!("{}", decision.to_text());
+                println!("SLM status: {status}");
+                if let Some(tier) = suggested {
+                    println!("SLM suggested: {} (advisory)", tier.as_str());
+                }
+                if let Some(message) = fallback {
+                    println!("Local SLM fallback: {message}");
+                }
+                println!("Recommended tier: {} (not applied)", recommended.as_str());
             }
             ExitCode::SUCCESS
         }

@@ -7,6 +7,8 @@ pub struct Options {
     pub oss: bool,
     pub local_provider: Option<String>,
     pub model: Option<String>,
+    pub slm: Option<String>,
+    pub slm_always: bool,
     pub effort: Option<String>,
 }
 
@@ -22,7 +24,7 @@ pub enum Action {
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
 
 USAGE
-    preagent route [--json] [--no-git] <prompt>
+    preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] <prompt>
     preagent run [--dry-run] [--oss] [--local-provider ollama|lmstudio]
                  [--model NAME] [--effort LEVEL] [--no-git] <prompt>
     preagent eval [--json]
@@ -35,7 +37,9 @@ COMMANDS
     eval     Score the built-in, labeled routing smoke corpus (no AI calls).
 
 OPTIONS
-    --json             Machine-readable route (route only).
+    --json             Machine-readable route or evaluation output.
+    --slm MODEL        Use installed Ollama model via loopback (route only).
+    --slm-always       Consult SLM even on unambiguous prompts.
     --no-git           Do not inspect local Git metadata.
     --dry-run          Preview the Codex command without launching it.
     --oss              Request Codex's local open-model provider mode.
@@ -44,8 +48,9 @@ OPTIONS
     --effort           User-selected Codex effort (not automatically applied).
     --                 End options; useful for prompts starting with hyphens.
 
-Routing is advisory, not a calibrated prediction. Local SLM inference,
-automatic model choice, and optional prompt context are future milestones.
+Routing is advisory, not calibrated. Optional SLM inference needs a locally
+running Ollama and an installed model; no model is downloaded automatically.
+Automatic model choice and prompt improvements are future milestones.
 A Codex cloud model may incur provider charges. Use --oss with a verified
 local model and runtime for a fully local execution workflow.";
 
@@ -83,6 +88,8 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
                 break;
             }
             "--no-git" => options.no_git = true,
+            "--slm" if !is_run => options.slm = Some(next_value(&mut args, "--slm")?),
+            "--slm-always" if !is_run => options.slm_always = true,
             "--json" if !is_run => options.json = true,
             "--dry-run" if is_run => options.dry_run = true,
             "--oss" if is_run => options.oss = true,
@@ -118,6 +125,9 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
         }
         Ok(Action::Run(options))
     } else {
+        if options.slm_always && options.slm.is_none() {
+            return Err("--slm-always requires --slm MODEL".to_string());
+        }
         Ok(Action::Route(options))
     }
 }
@@ -148,6 +158,19 @@ mod tests {
             Action::Eval { json: true }
         );
         assert!(parse_words(&["eval", "--model", "foo"]).is_err());
+    }
+
+    #[test]
+    fn local_slm_requires_explicit_route_opt_in() {
+        let Action::Route(options) =
+            parse_words(&["route", "--slm", "qwen3.5:2b", "--slm-always", "fix"]).unwrap()
+        else {
+            panic!("expected route");
+        };
+        assert_eq!(options.slm.as_deref(), Some("qwen3.5:2b"));
+        assert!(options.slm_always);
+        assert!(parse_words(&["route", "--slm-always", "fix"]).is_err());
+        assert!(parse_words(&["run", "--slm", "model", "fix"]).is_err());
     }
 
     #[test]

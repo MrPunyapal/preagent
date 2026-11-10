@@ -2,10 +2,9 @@
 
 An offline-first, open-source pre-agent for coding assistants.
 
-**Status: initial Rust baseline.** This release provides deterministic, explainable
-task classification and a safe Codex CLI pass-through. It is **not yet** an
-automatic model router or a built-in SLM. We will add those features only
-after benchmarking the rules-only baseline.
+**Status: early Rust prototype.** This release provides deterministic, explainable
+task classification and a safe Codex CLI pass-through. It is not yet an automatic model router or a bundled SLM. Optional local
+Ollama classification is experimental and advisory.
 
 ## Principles
 
@@ -15,7 +14,7 @@ after benchmarking the rules-only baseline.
 - The developer's prompt is forwarded unchanged as a single process argument.
 - No unverified model IDs, automatic provider changes, or hidden prompt rewrites.
 - Native Codex approvals, authentication, and sandbox configuration stay in control.
-- Future local inference will be optional; rules will work without a model.
+- Optional local inference remains opt-in; rules work without a model.
 
 ## Build
 
@@ -31,6 +30,22 @@ Classify a request with no AI service:
     cargo run -- route "Fix authentication redirect"
     cargo run -- route --no-git --json "Fix README typo"
     cargo run -- eval
+
+Use an already installed local Ollama model to analyze uncertain prompts:
+
+    cargo run -- route --slm qwen3.5:2b "Help with this problem"
+
+Force local SLM comparison even when rules are certain:
+
+    cargo run -- route --slm qwen3.5:2b --slm-always "Fix README typo"
+
+The optional SLM connects only to 127.0.0.1:11434. Set
+PREAGENT_OLLAMA_PORT to choose another loopback port. It never downloads
+models, requests paid services, or contacts external hosts. A local runtime
+and an already installed model are required. Failures preserve the
+deterministic decision and model suggestions cannot downgrade a higher-risk
+rules-based tier. The suggestion does not automatically override the Codex
+model or reasoning effort.
 
 Preview the Codex command without launching it:
 

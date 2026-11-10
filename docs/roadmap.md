@@ -29,7 +29,7 @@ Acceptance: an independent contributor can reproduce the comparison.
 - Invoke a local SLM only when deterministic signals are insufficient.
 - Validate outputs; fall back to rules on errors or latency limits.
 - No model downloads or network access without explicit setup.
-- Benchmark Ollama adapter before considering embedded llama.cpp.
+- Benchmark the now-available opt-in Ollama adapter before considering embedded llama.cpp.
 
 Acceptance: SLM provides measurable value on held-out tasks or stays optional.
 
