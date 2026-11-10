@@ -143,7 +143,9 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             return Err("--oss and --local-provider are Codex-only options".to_string());
         }
         if options.agent == Agent::OpenCode && options.effort.is_some() {
-            return Err("--effort is not portable to OpenCode; set a native model variant".to_string());
+            return Err(
+                "--effort is not portable to OpenCode; set a native model variant".to_string(),
+            );
         }
         if let Some(provider) = &options.local_provider {
             if provider != "ollama" && provider != "lmstudio" {
@@ -219,8 +221,7 @@ mod tests {
         assert!(parse_words(&["run", "--agent", "opencode", "--effort", "high", "fix"]).is_err());
         assert!(parse_words(&["run", "--agent", "claude", "--effort", "xhigh", "fix"]).is_err());
         assert!(parse_words(&["run", "--agent", "other", "fix"]).is_err());
-        let Action::Run(options) =
-            parse_words(&["run", "--agent", "opencode", "Fix bug"]).unwrap()
+        let Action::Run(options) = parse_words(&["run", "--agent", "opencode", "Fix bug"]).unwrap()
         else {
             panic!("expected run");
         };

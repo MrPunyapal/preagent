@@ -122,9 +122,16 @@ mod tests {
         opts.agent = Agent::OpenCode;
         let opencode = invocation(&opts);
         assert_eq!(opencode.executable, "opencode");
-        assert_eq!(opencode.arguments, vec![
-            "mini", "--model", "known-model", "--prompt", prompt.as_str()
-        ]);
+        assert_eq!(
+            opencode.arguments,
+            vec![
+                "mini",
+                "--model",
+                "known-model",
+                "--prompt",
+                prompt.as_str()
+            ]
+        );
     }
 
     #[test]
