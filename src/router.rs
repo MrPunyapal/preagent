@@ -112,10 +112,37 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
         "migration",
         "migrations",
     ]);
-    let debugging = has(&["fix", "bug", "bugs", "debug", "debugging", "error", "errors", "crash", "regression", "repair", "resolve"]);
-    let refactoring = has(&["refactor", "refactoring", "restructure", "cleanup", "clean up"]);
+    let debugging = has(&[
+        "fix",
+        "bug",
+        "bugs",
+        "debug",
+        "debugging",
+        "error",
+        "errors",
+        "crash",
+        "regression",
+        "repair",
+        "resolve",
+    ]);
+    let refactoring = has(&[
+        "refactor",
+        "refactoring",
+        "restructure",
+        "cleanup",
+        "clean up",
+    ]);
     let feature = has(&["implement", "add", "build", "create", "feature"]);
-    let docs = has(&["readme", "documentation", "docs", "typo", "comment", "markdown", "spelling", "whitespace"]);
+    let docs = has(&[
+        "readme",
+        "documentation",
+        "docs",
+        "typo",
+        "comment",
+        "markdown",
+        "spelling",
+        "whitespace",
+    ]);
     let tests = has(&["test", "tests", "testing", "coverage", "spec", "specs"]);
     let trivial = docs
         && has(&["typo", "spelling", "whitespace", "readme"])
@@ -280,13 +307,22 @@ mod tests {
 
     #[test]
     fn words_inside_other_words_do_not_trigger_security() {
-        assert_eq!(route("Update author attribution in README").tier, Tier::Simple);
-        assert_eq!(route("Contest winners are listed in README").tier, Tier::Simple);
+        assert_eq!(
+            route("Update author attribution in README").tier,
+            Tier::Simple
+        );
+        assert_eq!(
+            route("Contest winners are listed in README").tier,
+            Tier::Simple
+        );
     }
 
     #[test]
     fn full_authentication_word_is_security_sensitive() {
-        assert_eq!(route("Fix authentication login failure").tier, Tier::Complex);
+        assert_eq!(
+            route("Fix authentication login failure").tier,
+            Tier::Complex
+        );
     }
 
     #[test]

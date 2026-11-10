@@ -25,11 +25,16 @@ pub fn evaluate_builtin() -> Result<Report, String> {
         }
         let fields: Vec<&str> = line.split('\t').collect();
         if fields.len() != 3 {
-            return Err(format!("line {}: expected 3 tab-separated columns", index + 1));
+            return Err(format!(
+                "line {}: expected 3 tab-separated columns",
+                index + 1
+            ));
         }
         let (id, expected, prompt) = (fields[0], fields[1], fields[2]);
         if id.is_empty()
-            || !id.bytes().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
+            || !id
+                .bytes()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
         {
             return Err(format!("line {}: invalid case identifier", index + 1));
         }
@@ -95,13 +100,18 @@ impl Report {
 
     pub fn to_json(&self) -> String {
         let (correct, total) = self.accuracy();
-        let mismatches = self.rows.iter().filter(|r| r.expected != r.actual)
-            .map(|row| format!(
-                "{{\"id\":\"{}\",\"expected\":\"{}\",\"actual\":\"{}\"}}",
-                row.id,
-                row.expected.as_str(),
-                row.actual.as_str(),
-            ))
+        let mismatches = self
+            .rows
+            .iter()
+            .filter(|r| r.expected != r.actual)
+            .map(|row| {
+                format!(
+                    "{{\"id\":\"{}\",\"expected\":\"{}\",\"actual\":\"{}\"}}",
+                    row.id,
+                    row.expected.as_str(),
+                    row.actual.as_str(),
+                )
+            })
             .collect::<Vec<_>>()
             .join(",");
         format!(

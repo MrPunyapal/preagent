@@ -139,8 +139,14 @@ mod tests {
 
     #[test]
     fn eval_has_no_side_effects_or_prompt() {
-        assert_eq!(parse_words(&["eval"]).unwrap(), Action::Eval { json: false });
-        assert_eq!(parse_words(&["eval", "--json"]).unwrap(), Action::Eval { json: true });
+        assert_eq!(
+            parse_words(&["eval"]).unwrap(),
+            Action::Eval { json: false }
+        );
+        assert_eq!(
+            parse_words(&["eval", "--json"]).unwrap(),
+            Action::Eval { json: true }
+        );
         assert!(parse_words(&["eval", "--model", "foo"]).is_err());
     }
 
