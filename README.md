@@ -3,7 +3,7 @@
 An offline-first, open-source pre-agent for coding assistants.
 
 **Status: early Rust prototype.** This release provides deterministic, explainable
-task classification and a safe Codex CLI pass-through. It is not yet an automatic model router or a bundled SLM. Optional local
+task classification and a safe coding-agent CLI pass-through. It is not yet an automatic model router or a bundled SLM. Optional local
 Ollama classification is experimental and advisory.
 
 ## Principles
@@ -54,6 +54,16 @@ Preview the Codex command without launching it:
 Launch the installed Codex CLI with the unmodified prompt:
 
     cargo run -- run "Fix authentication redirect"
+
+Or launch installed Claude Code or OpenCode, using the same original prompt:
+
+    cargo run -- run --agent claude "Fix authentication redirect"
+    cargo run -- run --agent opencode "Fix authentication redirect"
+
+Claude Code uses its native interactive CLI; OpenCode uses the officially
+documented mini TUI with its initial prompt. Models are passed only when
+explicitly selected, and agent-specific arguments are validated. No new
+provider authentication or API credentials are requested by Preagent.
 
 Ask Codex to use an Ollama-hosted open model that you have downloaded
 and verified as local and tool-capable:

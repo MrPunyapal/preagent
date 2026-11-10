@@ -1,6 +1,25 @@
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Agent {
+    #[default]
+    Codex,
+    Claude,
+    OpenCode,
+}
+
+impl Agent {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Codex => "codex",
+            Self::Claude => "claude",
+            Self::OpenCode => "opencode",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Options {
     pub prompt: String,
+    pub agent: Agent,
     pub no_git: bool,
     pub json: bool,
     pub dry_run: bool,
@@ -25,15 +44,16 @@ pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
 
 USAGE
     preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] <prompt>
-    preagent run [--dry-run] [--oss] [--local-provider ollama|lmstudio]
-                 [--model NAME] [--effort LEVEL] [--no-git] <prompt>
+    preagent run [--agent codex|claude|opencode] [--dry-run] [--oss]
+                 [--local-provider ollama|lmstudio] [--model NAME]
+                 [--effort LEVEL] [--no-git] <prompt>
     preagent eval [--json]
     preagent --help
     preagent --version
 
 COMMANDS
     route    Classify a prompt locally without calling an AI service.
-    run      Start Codex with the ORIGINAL prompt; no automatic model override.
+    run      Start the selected coding agent with the ORIGINAL prompt.
     eval     Score the built-in, labeled routing smoke corpus (no AI calls).
 
 OPTIONS
@@ -41,7 +61,8 @@ OPTIONS
     --slm MODEL        Use installed Ollama model via loopback (route only).
     --slm-always       Consult SLM even on unambiguous prompts.
     --no-git           Do not inspect local Git metadata.
-    --dry-run          Preview the Codex command without launching it.
+    --dry-run          Preview native agent arguments without launching it.
+    --agent NAME       Choose codex (default), claude or opencode.
     --oss              Request Codex's local open-model provider mode.
     --local-provider   Explicit provider: ollama or lmstudio (requires --oss).
     --model            User-selected Codex model (never guessed).
@@ -92,6 +113,14 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             "--slm-always" if !is_run => options.slm_always = true,
             "--json" if !is_run => options.json = true,
             "--dry-run" if is_run => options.dry_run = true,
+            "--agent" if is_run => {
+                options.agent = match next_value(&mut args, "--agent")?.as_str() {
+                    "codex" => Agent::Codex,
+                    "claude" => Agent::Claude,
+                    "opencode" => Agent::OpenCode,
+                    _ => return Err("--agent must be codex, claude or opencode".to_string()),
+                };
+            }
             "--oss" if is_run => options.oss = true,
             "--model" if is_run => options.model = Some(next_value(&mut args, "--model")?),
             "--effort" if is_run => options.effort = Some(next_value(&mut args, "--effort")?),
@@ -110,6 +139,12 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
         return Err("a non-empty prompt is required".to_string());
     }
     if is_run {
+        if options.agent != Agent::Codex && (options.oss || options.local_provider.is_some()) {
+            return Err("--oss and --local-provider are Codex-only options".to_string());
+        }
+        if options.agent == Agent::OpenCode && options.effort.is_some() {
+            return Err("--effort is not portable to OpenCode; set a native model variant".to_string());
+        }
         if let Some(provider) = &options.local_provider {
             if provider != "ollama" && provider != "lmstudio" {
                 return Err("local provider must be 'ollama' or 'lmstudio'".to_string());
@@ -119,8 +154,13 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             }
         }
         if let Some(effort) = &options.effort {
-            if !["minimal", "low", "medium", "high", "xhigh"].contains(&effort.as_str()) {
-                return Err("effort must be minimal, low, medium, high, or xhigh".to_string());
+            if !["minimal", "low", "medium", "high", "xhigh", "max"].contains(&effort.as_str()) {
+                return Err("unsupported effort label".to_string());
+            }
+            if options.agent == Agent::Claude
+                && !["low", "medium", "high", "max"].contains(&effort.as_str())
+            {
+                return Err("Claude effort must be low, medium, high, or max".to_string());
             }
         }
         Ok(Action::Run(options))
@@ -171,6 +211,20 @@ mod tests {
         assert!(options.slm_always);
         assert!(parse_words(&["route", "--slm-always", "fix"]).is_err());
         assert!(parse_words(&["run", "--slm", "model", "fix"]).is_err());
+    }
+
+    #[test]
+    fn agent_specific_options_are_validated() {
+        assert!(parse_words(&["run", "--agent", "claude", "--oss", "fix"]).is_err());
+        assert!(parse_words(&["run", "--agent", "opencode", "--effort", "high", "fix"]).is_err());
+        assert!(parse_words(&["run", "--agent", "claude", "--effort", "xhigh", "fix"]).is_err());
+        assert!(parse_words(&["run", "--agent", "other", "fix"]).is_err());
+        let Action::Run(options) =
+            parse_words(&["run", "--agent", "opencode", "Fix bug"]).unwrap()
+        else {
+            panic!("expected run");
+        };
+        assert_eq!(options.agent, Agent::OpenCode);
     }
 
     #[test]

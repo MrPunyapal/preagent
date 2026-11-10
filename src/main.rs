@@ -99,18 +99,19 @@ fn run(options: Options) -> ExitCode {
 
     // No unverified model choice or prompt rewrite. Only user-specified
     // overrides are forwarded to Codex.
-    let invocation = agent::codex_invocation(&options);
+    let invocation = agent::invocation(&options);
     if options.dry_run {
         println!("{}", decision.to_text());
-        println!("Codex arguments: {}", invocation.display());
+        println!("Agent arguments: {}", invocation.display());
         println!("No agent was started. Original prompt is unchanged.");
         return ExitCode::SUCCESS;
     }
 
     eprintln!(
-        "preagent: {} task, {} tier (advisory); launching Codex with unchanged prompt",
+        "preagent: {} task, {} tier (advisory); launching {} with unchanged prompt",
         decision.intent.as_str(),
-        decision.tier.as_str()
+        decision.tier.as_str(),
+        options.agent.as_str()
     );
     match invocation.execute() {
         Ok(code) if (0..=255).contains(&code) => ExitCode::from(code as u8),

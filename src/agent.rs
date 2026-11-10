@@ -1,10 +1,48 @@
-use crate::cli::Options;
+use crate::cli::{Agent, Options};
 use std::process::Command;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Invocation {
     pub executable: &'static str,
     pub arguments: Vec<String>,
+}
+
+pub fn invocation(options: &Options) -> Invocation {
+    match options.agent {
+        Agent::Codex => codex_invocation(options),
+        Agent::Claude => claude_invocation(options),
+        Agent::OpenCode => opencode_invocation(options),
+    }
+}
+
+pub fn claude_invocation(options: &Options) -> Invocation {
+    let mut arguments = Vec::new();
+    if let Some(model) = &options.model {
+        arguments.extend(["--model".to_string(), model.clone()]);
+    }
+    if let Some(effort) = &options.effort {
+        arguments.extend(["--effort".to_string(), effort.clone()]);
+    }
+    arguments.push(options.prompt.clone());
+    Invocation {
+        executable: "claude",
+        arguments,
+    }
+}
+
+// OpenCode mini is an officially documented interactive interface that
+// accepts an initial prompt. Native OpenCode remains responsible for model
+// availability, permissions, sessions and sandboxing.
+pub fn opencode_invocation(options: &Options) -> Invocation {
+    let mut arguments = vec!["mini".to_string()];
+    if let Some(model) = &options.model {
+        arguments.extend(["--model".to_string(), model.clone()]);
+    }
+    arguments.extend(["--prompt".to_string(), options.prompt.clone()]);
+    Invocation {
+        executable: "opencode",
+        arguments,
+    }
 }
 
 pub fn codex_invocation(options: &Options) -> Invocation {
@@ -67,6 +105,26 @@ mod tests {
         assert_eq!(invocation.arguments.len(), 2);
         assert_eq!(invocation.arguments[0], "--");
         assert_eq!(invocation.arguments[1], options.prompt);
+    }
+
+    #[test]
+    fn other_agents_preserve_prompt_as_one_argument() {
+        let prompt = "Fix bug ; echo not-executed".to_string();
+        let mut opts = Options {
+            prompt: prompt.clone(),
+            model: Some("known-model".into()),
+            ..Options::default()
+        };
+        opts.agent = Agent::Claude;
+        let claude = invocation(&opts);
+        assert_eq!(claude.executable, "claude");
+        assert_eq!(claude.arguments.last(), Some(&prompt));
+        opts.agent = Agent::OpenCode;
+        let opencode = invocation(&opts);
+        assert_eq!(opencode.executable, "opencode");
+        assert_eq!(opencode.arguments, vec![
+            "mini", "--model", "known-model", "--prompt", prompt.as_str()
+        ]);
     }
 
     #[test]
