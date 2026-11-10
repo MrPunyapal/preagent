@@ -34,10 +34,20 @@ pub fn classify(prompt: &str, model: &str) -> Result<Tier, String> {
             .ok_or("PREAGENT_OLLAMA_PORT must be a nonzero port")?,
         Err(_) => 11434,
     };
-    query(SocketAddr::from(([127, 0, 0, 1], port)), prompt, model, TIMEOUT)
+    query(
+        SocketAddr::from(([127, 0, 0, 1], port)),
+        prompt,
+        model,
+        TIMEOUT,
+    )
 }
 
-fn query(address: SocketAddr, prompt: &str, model: &str, timeout: Duration) -> Result<Tier, String> {
+fn query(
+    address: SocketAddr,
+    prompt: &str,
+    model: &str,
+    timeout: Duration,
+) -> Result<Tier, String> {
     let classifier = format!(
         "Classify this developer coding task by complexity. Reply with EXACTLY ONE \
          lowercase word: simple, standard, or complex. \
@@ -63,7 +73,8 @@ fn query(address: SocketAddr, prompt: &str, model: &str, timeout: Duration) -> R
         "POST /api/generate HTTP/1.1\r\nHost: 127.0.0.1\r\n\
          Content-Type: application/json\r\nConnection: close\r\n\
          Content-Length: {}\r\n\r\n{}",
-        body.len(), body
+        body.len(),
+        body
     );
     stream
         .write_all(request.as_bytes())
@@ -84,24 +95,30 @@ fn parse_http_response(raw: &[u8]) -> Result<Tier, String> {
         .windows(4)
         .position(|bytes| bytes == b"\r\n\r\n")
         .ok_or("local server sent malformed HTTP headers")?;
-    let headers = std::str::from_utf8(&raw[..header_end])
-        .map_err(|_| "local server sent invalid headers")?;
+    let headers =
+        std::str::from_utf8(&raw[..header_end]).map_err(|_| "local server sent invalid headers")?;
     let mut lines = headers.lines();
     let status = lines
         .next()
         .and_then(|line| line.split_whitespace().nth(1))
         .ok_or("local server sent no HTTP status")?;
     if status != "200" {
-        return Err(format!("local Ollama returned HTTP {status}; check installed model"));
+        return Err(format!(
+            "local Ollama returned HTTP {status}; check installed model"
+        ));
     }
     let chunked = lines.any(|line| {
         let line = line.to_ascii_lowercase();
         line.starts_with("transfer-encoding:") && line.contains("chunked")
     });
     let payload = &raw[header_end + 4..];
-    let body = if chunked { decode_chunks(payload)? } else { payload.to_vec() };
-    let document = std::str::from_utf8(&body)
-        .map_err(|_| "local model response is not valid UTF-8")?;
+    let body = if chunked {
+        decode_chunks(payload)?
+    } else {
+        payload.to_vec()
+    };
+    let document =
+        std::str::from_utf8(&body).map_err(|_| "local model response is not valid UTF-8")?;
     let reply = response_field(document)?;
     match reply.trim().to_ascii_lowercase().as_str() {
         "simple" => Ok(Tier::Simple),
@@ -118,8 +135,8 @@ fn decode_chunks(mut payload: &[u8]) -> Result<Vec<u8>, String> {
             .windows(2)
             .position(|bytes| bytes == b"\r\n")
             .ok_or("missing HTTP chunk length")?;
-        let length = std::str::from_utf8(&payload[..line_end])
-            .map_err(|_| "invalid HTTP chunk length")?;
+        let length =
+            std::str::from_utf8(&payload[..line_end]).map_err(|_| "invalid HTTP chunk length")?;
         let size = usize::from_str_radix(length.split(';').next().unwrap_or(""), 16)
             .map_err(|_| "invalid HTTP chunk size")?;
         payload = &payload[line_end + 2..];
@@ -146,7 +163,9 @@ fn json_quote(value: &str) -> String {
             '\n' => result.push_str("\\n"),
             '\r' => result.push_str("\\r"),
             '\t' => result.push_str("\\t"),
-            control if control <= '\u{001f}' => result.push_str(&format!("\\u{:04x}", control as u32)),
+            control if control <= '\u{001f}' => {
+                result.push_str(&format!("\\u{:04x}", control as u32))
+            }
             other => result.push(other),
         }
     }
@@ -158,7 +177,10 @@ fn response_field(document: &str) -> Result<String, String> {
     let marker = "\"response\"";
     let index = document.find(marker).ok_or("response field missing")?;
     let rest = document[index + marker.len()..].trim_start();
-    let value = rest.strip_prefix(':').ok_or("malformed response field")?.trim_start();
+    let value = rest
+        .strip_prefix(':')
+        .ok_or("malformed response field")?
+        .trim_start();
     json_string(value)
 }
 
@@ -186,8 +208,8 @@ fn json_string(source: &str) -> Result<String, String> {
                         let digits: String = (0..4)
                             .map(|_| chars.next().ok_or("truncated unicode escape"))
                             .collect::<Result<_, _>>()?;
-                        let point = u32::from_str_radix(&digits, 16)
-                            .map_err(|_| "bad unicode escape")?;
+                        let point =
+                            u32::from_str_radix(&digits, 16).map_err(|_| "bad unicode escape")?;
                         decoded.push(char::from_u32(point).ok_or("invalid unicode scalar")?);
                     }
                     _ => return Err("invalid JSON escape".to_string()),
@@ -212,7 +234,10 @@ mod tests {
             parse_http_response(b"HTTP/1.1 200 OK\r\n\r\n{\"response\":\"standard\\n\"}").unwrap(),
             Tier::Standard
         );
-        assert!(parse_http_response(b"HTTP/1.1 200 OK\r\n\r\n{\"response\":\"Maybe standard\"}").is_err());
+        assert!(
+            parse_http_response(b"HTTP/1.1 200 OK\r\n\r\n{\"response\":\"Maybe standard\"}")
+                .is_err()
+        );
         assert_eq!(safer_tier(Tier::Complex, Tier::Simple), Tier::Complex);
     }
 
@@ -238,7 +263,9 @@ mod tests {
         let address = server.local_addr().unwrap();
         let child = thread::spawn(move || {
             let (mut stream, _) = server.accept().unwrap();
-            stream.set_read_timeout(Some(Duration::from_secs(3))).unwrap();
+            stream
+                .set_read_timeout(Some(Duration::from_secs(3)))
+                .unwrap();
             let mut buffer = [0; 8192];
             let n = stream.read(&mut buffer).unwrap();
             let request = std::str::from_utf8(&buffer[..n]).unwrap();
@@ -247,12 +274,19 @@ mod tests {
             let payload = "{\"response\":\"complex\"}";
             let wire = format!(
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-                payload.len(), payload
+                payload.len(),
+                payload
             );
             stream.write_all(wire.as_bytes()).unwrap();
         });
         assert_eq!(
-            query(address, "Fix security issue", "example-local", Duration::from_secs(3)).unwrap(),
+            query(
+                address,
+                "Fix security issue",
+                "example-local",
+                Duration::from_secs(3)
+            )
+            .unwrap(),
             Tier::Complex
         );
         child.join().unwrap();
