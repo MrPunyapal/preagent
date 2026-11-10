@@ -1,5 +1,22 @@
 use crate::context::RepoContext;
 
+/// Require token boundaries so "author" does not trigger "auth", or
+/// "contest" trigger "test". Phrases such as "clean up" remain supported.
+/// This is a conservative deterministic signal, not language understanding.
+fn contains_phrase(text: &str, phrase: &str) -> bool {
+    text.match_indices(phrase).any(|(index, _)| {
+        let before = text[..index]
+            .chars()
+            .next_back()
+            .map_or(true, |c| !c.is_alphanumeric() && c != '_');
+        let after = text[index + phrase.len()..]
+            .chars()
+            .next()
+            .map_or(true, |c| !c.is_alphanumeric() && c != '_');
+        before && after
+    })
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Intent {
     Documentation,
@@ -65,31 +82,41 @@ pub struct Decision {
 
 pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
     let p = prompt.to_lowercase();
-    let has = |words: &[&str]| words.iter().any(|word| p.contains(word));
+    let has = |words: &[&str]| words.iter().any(|word| contains_phrase(&p, word));
 
     let security = has(&[
         "security",
-        "vulnerab",
+        "vulnerability",
+        "vulnerabilities",
         "cve",
         "exploit",
         "auth",
+        "authentication",
+        "authorization",
         "permission",
+        "permissions",
         "secret",
+        "secrets",
         "credential",
+        "credentials",
         "payment",
+        "payments",
     ]);
     let architecture = has(&[
-        "architect",
+        "architecture",
+        "architectural",
         "redesign",
         "distributed",
         "microservice",
+        "microservices",
         "migration",
+        "migrations",
     ]);
-    let debugging = has(&["fix", "bug", "debug", "error", "crash", "regression"]);
-    let refactoring = has(&["refactor", "restructure", "cleanup", "clean up"]);
-    let feature = has(&["implement", "add ", "build", "create", "feature"]);
-    let docs = has(&["readme", "documentation", "docs", "typo", "comment"]);
-    let tests = has(&["test", "coverage", "spec"]);
+    let debugging = has(&["fix", "bug", "bugs", "debug", "debugging", "error", "errors", "crash", "regression", "repair", "resolve"]);
+    let refactoring = has(&["refactor", "refactoring", "restructure", "cleanup", "clean up"]);
+    let feature = has(&["implement", "add", "build", "create", "feature"]);
+    let docs = has(&["readme", "documentation", "docs", "typo", "comment", "markdown", "spelling", "whitespace"]);
+    let tests = has(&["test", "tests", "testing", "coverage", "spec", "specs"]);
     let trivial = docs
         && has(&["typo", "spelling", "whitespace", "readme"])
         && !security
@@ -249,6 +276,30 @@ mod tests {
 
     fn route(prompt: &str) -> Decision {
         classify(prompt, &RepoContext::default())
+    }
+
+    #[test]
+    fn words_inside_other_words_do_not_trigger_security() {
+        assert_eq!(route("Update author attribution in README").tier, Tier::Simple);
+        assert_eq!(route("Contest winners are listed in README").tier, Tier::Simple);
+    }
+
+    #[test]
+    fn full_authentication_word_is_security_sensitive() {
+        assert_eq!(route("Fix authentication login failure").tier, Tier::Complex);
+    }
+
+    #[test]
+    fn standalone_add_is_a_feature_signal() {
+        assert_eq!(route("Add profile page").tier, Tier::Standard);
+    }
+
+    #[test]
+    fn phrase_matching_observes_word_boundaries() {
+        assert!(contains_phrase("clean up this module", "clean up"));
+        assert!(!contains_phrase("authors", "auth"));
+        assert!(!contains_phrase("contest", "test"));
+        assert!(contains_phrase("Fix auth bug", "auth"));
     }
 
     #[test]
