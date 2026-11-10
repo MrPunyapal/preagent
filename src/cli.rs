@@ -161,9 +161,15 @@ mod tests {
 
     #[test]
     fn allows_explicit_user_model_and_effort() {
-        let Action::Run(options) =
-            parse_words(&["run", "--model", "installed-model", "--effort", "low", "fix"]).unwrap()
-        else {
+        let Action::Run(options) = parse_words(&[
+            "run",
+            "--model",
+            "installed-model",
+            "--effort",
+            "low",
+            "fix",
+        ])
+        .unwrap() else {
             panic!("expected run");
         };
         assert_eq!(options.model.as_deref(), Some("installed-model"));

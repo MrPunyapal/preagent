@@ -22,7 +22,11 @@ pub fn discover(enabled: bool) -> RepoContext {
         .lines()
         .take(100)
         .filter_map(|line| line.get(3..))
-        .map(|path| path.rsplit_once(" -> ").map_or(path, |(_, to)| to).to_string())
+        .map(|path| {
+            path.rsplit_once(" -> ")
+                .map_or(path, |(_, to)| to)
+                .to_string()
+        })
         .collect();
 
     RepoContext {

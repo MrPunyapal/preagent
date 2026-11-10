@@ -68,11 +68,22 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
     let has = |words: &[&str]| words.iter().any(|word| p.contains(word));
 
     let security = has(&[
-        "security", "vulnerab", "cve", "exploit", "auth", "permission",
-        "secret", "credential", "payment",
+        "security",
+        "vulnerab",
+        "cve",
+        "exploit",
+        "auth",
+        "permission",
+        "secret",
+        "credential",
+        "payment",
     ]);
     let architecture = has(&[
-        "architect", "redesign", "distributed", "microservice", "migration",
+        "architect",
+        "redesign",
+        "distributed",
+        "microservice",
+        "migration",
     ]);
     let debugging = has(&["fix", "bug", "debug", "error", "crash", "regression"]);
     let refactoring = has(&["refactor", "restructure", "cleanup", "clean up"]);
@@ -114,15 +125,23 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
         reasons.push("implementation or verification requested");
     }
     if has(&[
-        "entire", "whole codebase", "across the project", "many files",
-        "multiple modules", "end-to-end",
+        "entire",
+        "whole codebase",
+        "across the project",
+        "many files",
+        "multiple modules",
+        "end-to-end",
     ]) {
         score += 3;
         reasons.push("broad scope");
     }
     if has(&[
-        "race condition", "deadlock", "concurrency", "distributed",
-        "intermittent", "performance regression",
+        "race condition",
+        "deadlock",
+        "concurrency",
+        "distributed",
+        "intermittent",
+        "performance regression",
     ]) {
         score += 3;
         reasons.push("difficult technical constraints");
@@ -143,7 +162,10 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
     // Working-tree files can be unrelated to the prompt. Only route on them
     // when the user explicitly mentions these particular changes.
     let refers_to_changes = has(&[
-        "these changes", "current diff", "working tree", "staged changes",
+        "these changes",
+        "current diff",
+        "working tree",
+        "staged changes",
     ]);
     if refers_to_changes && context.changed_paths.len() >= 5 {
         score += 2;
@@ -201,7 +223,8 @@ impl Decision {
     }
 
     pub fn to_json(&self) -> String {
-        let reasons = self.reasons
+        let reasons = self
+            .reasons
             .iter()
             .map(|reason| format!("\"{reason}\""))
             .collect::<Vec<_>>()
@@ -250,7 +273,10 @@ mod tests {
 
     #[test]
     fn concurrency_is_complex() {
-        assert_eq!(route("Fix intermittent concurrency crash").tier, Tier::Complex);
+        assert_eq!(
+            route("Fix intermittent concurrency crash").tier,
+            Tier::Complex
+        );
     }
 
     #[test]
@@ -268,7 +294,10 @@ mod tests {
             is_repo: true,
             changed_paths: vec!["src/security/rules.rs".to_string()],
         };
-        assert_eq!(classify("Review these changes", &context).tier, Tier::Complex);
+        assert_eq!(
+            classify("Review these changes", &context).tier,
+            Tier::Complex
+        );
     }
 
     #[test]
