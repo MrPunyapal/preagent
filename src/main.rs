@@ -85,7 +85,7 @@ fn main() -> ExitCode {
                 println!("{}", results.to_text());
             }
             ExitCode::SUCCESS
-        },
+        }
         Action::Eval { json } => match evaluation::evaluate_builtin() {
             Ok(report) => {
                 if json {

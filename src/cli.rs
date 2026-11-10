@@ -237,8 +237,14 @@ mod tests {
 
     #[test]
     fn doctor_accepts_json_without_prompt() {
-        assert_eq!(parse_words(&["doctor"]).unwrap(), Action::Doctor { json: false });
-        assert_eq!(parse_words(&["doctor", "--json"]).unwrap(), Action::Doctor { json: true });
+        assert_eq!(
+            parse_words(&["doctor"]).unwrap(),
+            Action::Doctor { json: false }
+        );
+        assert_eq!(
+            parse_words(&["doctor", "--json"]).unwrap(),
+            Action::Doctor { json: true }
+        );
         assert!(parse_words(&["doctor", "unexpected"]).is_err());
     }
 

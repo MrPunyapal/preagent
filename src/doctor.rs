@@ -43,7 +43,8 @@ pub fn check() -> Diagnostics {
         ollama: TcpStream::connect_timeout(
             &SocketAddr::from(([127, 0, 0, 1], port)),
             Duration::from_millis(250),
-        ).is_ok(),
+        )
+        .is_ok(),
     }
 }
 
