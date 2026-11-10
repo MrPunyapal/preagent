@@ -38,6 +38,7 @@ pub enum Action {
     Route(Options),
     Run(Options),
     Eval { json: bool },
+    Doctor { json: bool },
 }
 
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
@@ -48,6 +49,7 @@ USAGE
                  [--local-provider ollama|lmstudio] [--model NAME]
                  [--effort LEVEL] [--no-git] <prompt>
     preagent eval [--json]
+    preagent doctor [--json]
     preagent --help
     preagent --version
 
@@ -55,6 +57,7 @@ COMMANDS
     route    Classify a prompt locally without calling an AI service.
     run      Start the selected coding agent with the ORIGINAL prompt.
     eval     Score the built-in, labeled routing smoke corpus (no AI calls).
+    doctor   Report installed agents and loopback Ollama availability.
 
 OPTIONS
     --json             Machine-readable route or evaluation output.
@@ -83,11 +86,11 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
     match command.as_str() {
         "-h" | "--help" | "help" => return Ok(Action::Help),
         "-V" | "--version" | "version" => return Ok(Action::Version),
-        "route" | "run" | "eval" => {}
+        "route" | "run" | "eval" | "doctor" => {}
         _ => return Err(format!("unknown command '{command}'")),
     }
 
-    if command == "eval" {
+    if command == "eval" || command == "doctor" {
         let mut json = false;
         for option in args {
             if option == "--json" {
@@ -96,7 +99,11 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
                 return Err(format!("unknown option '{option}' for eval"));
             }
         }
-        return Ok(Action::Eval { json });
+        return if command == "doctor" {
+            Ok(Action::Doctor { json })
+        } else {
+            Ok(Action::Eval { json })
+        };
     }
 
     let is_run = command == "run";
@@ -226,6 +233,13 @@ mod tests {
             panic!("expected run");
         };
         assert_eq!(options.agent, Agent::OpenCode);
+    }
+
+    #[test]
+    fn doctor_accepts_json_without_prompt() {
+        assert_eq!(parse_words(&["doctor"]).unwrap(), Action::Doctor { json: false });
+        assert_eq!(parse_words(&["doctor", "--json"]).unwrap(), Action::Doctor { json: true });
+        assert!(parse_words(&["doctor", "unexpected"]).is_err());
     }
 
     #[test]

@@ -30,6 +30,7 @@ Classify a request with no AI service:
     cargo run -- route "Fix authentication redirect"
     cargo run -- route --no-git --json "Fix README typo"
     cargo run -- eval
+    cargo run -- doctor
 
 Use an already installed local Ollama model to analyze uncertain prompts:
 
@@ -89,6 +90,13 @@ disable Git inspection.
 
 Heuristics are not calibrated confidence scores; please do not treat the
 output as a verified measure of model capability.
+
+## Offline diagnostics
+
+Run cargo run -- doctor to check which CLIs are available on PATH, whether
+Git is installed, and whether Ollama responds on the loopback interface.
+The command never contacts cloud services or reveals credentials. It does
+not authenticate with or execute any of the detected coding agents.
 
 ## Routing smoke corpus
 

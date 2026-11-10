@@ -1,6 +1,7 @@
 mod agent;
 mod cli;
 mod context;
+mod doctor;
 mod evaluation;
 mod router;
 mod slm;
@@ -76,6 +77,15 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Action::Run(options) => run(options),
+        Action::Doctor { json } => {
+            let results = doctor::check();
+            if json {
+                println!("{}", results.to_json());
+            } else {
+                println!("{}", results.to_text());
+            }
+            ExitCode::SUCCESS
+        },
         Action::Eval { json } => match evaluation::evaluate_builtin() {
             Ok(report) => {
                 if json {
