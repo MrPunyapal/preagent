@@ -101,6 +101,13 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
         "credentials",
         "payment",
         "payments",
+        "sql injection",
+        "command injection",
+        "remote code execution",
+        "path traversal",
+        "xss",
+        "csrf",
+        "ssrf",
     ]);
     let architecture = has(&[
         "architecture",
@@ -111,6 +118,7 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
         "microservices",
         "migration",
         "migrations",
+        "migrate",
     ]);
     let debugging = has(&[
         "fix",
@@ -228,9 +236,16 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
     let sensitive_changed = refers_to_changes
         && context.changed_paths.iter().any(|path| {
             let path = path.to_ascii_lowercase();
-            ["/auth/", "/security/", "/migrations/", "/payments/", ".env"]
-                .iter()
-                .any(|segment| path.contains(segment))
+            let path = format!("/{path}");
+            [
+                "/auth/",
+                "/security/",
+                "/migrations/",
+                "/payments/",
+                "/.env",
+            ]
+            .iter()
+            .any(|segment| path.contains(segment))
         });
     if sensitive_changed {
         score += 3;
@@ -238,7 +253,8 @@ pub fn classify(prompt: &str, context: &RepoContext) -> Decision {
     }
 
     score = score.min(10);
-    let tier = if security || architecture || sensitive_changed || score >= 5 {
+    let tier = if security || architecture || sensitive_changed || has(&["data loss"]) || score >= 5
+    {
         Tier::Complex
     } else if score >= 2 {
         Tier::Standard
@@ -354,8 +370,55 @@ mod tests {
     }
 
     #[test]
+    fn common_vulnerability_tasks_are_security_sensitive() {
+        for prompt in [
+            "Prevent SQL injection in the search endpoint",
+            "Patch XSS in profile rendering",
+            "Prevent CSRF on form submission",
+            "Stop SSRF in the URL fetcher",
+            "Block path traversal in file downloads",
+            "Prevent command injection in the launcher",
+            "Patch remote code execution in the parser",
+        ] {
+            let decision = route(prompt);
+            assert_eq!(decision.intent, Intent::Security, "{prompt}");
+            assert_eq!(decision.tier, Tier::Complex, "{prompt}");
+        }
+        assert_eq!(
+            route("Explain xssafe variable naming").intent,
+            Intent::General
+        );
+    }
+
+    #[test]
     fn architecture_work_is_complex() {
         assert_eq!(route("Redesign the architecture").tier, Tier::Complex);
+    }
+
+    #[test]
+    fn migration_and_data_loss_need_complex_review() {
+        assert_eq!(route("Migrate billing database schema").tier, Tier::Complex);
+        assert_eq!(route("Repair data loss regression").tier, Tier::Complex);
+    }
+
+    #[test]
+    fn sensitive_paths_at_repository_root_are_recognized() {
+        for path in [
+            "auth/login.rs",
+            "security/rules.rs",
+            "migrations/001.sql",
+            ".env",
+        ] {
+            let context = RepoContext {
+                is_repo: true,
+                changed_paths: vec![path.to_string()],
+            };
+            assert_eq!(
+                classify("Review these changes", &context).tier,
+                Tier::Complex
+            );
+            assert_eq!(classify("Fix README typo", &context).tier, Tier::Simple);
+        }
     }
 
     #[test]
