@@ -128,8 +128,9 @@ fn run(options: Options) -> ExitCode {
         options.agent.as_str()
     );
     match invocation.execute() {
-        Ok(code) if (0..=255).contains(&code) => ExitCode::from(code as u8),
-        Ok(_) => ExitCode::FAILURE,
+        // Windows exit codes are 32 bits (including Ctrl+C's NTSTATUS).
+        // ExitCode::from(u8) would silently turn native failures into code 1.
+        Ok(code) => std::process::exit(code),
         Err(message) => {
             eprintln!("preagent: {message}");
             ExitCode::FAILURE

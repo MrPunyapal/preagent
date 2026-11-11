@@ -68,8 +68,8 @@ OPTIONS
     --agent NAME       Choose codex (default), claude or opencode.
     --oss              Request Codex's local open-model provider mode.
     --local-provider   Explicit provider: ollama or lmstudio (requires --oss).
-    --model            User-selected Codex model (never guessed).
-    --effort           User-selected Codex effort (not automatically applied).
+    --model            User-selected agent model (never guessed).
+    --effort           User-selected Codex or Claude effort (not auto-applied).
     --                 End options; useful for prompts starting with hyphens.
 
 Routing is advisory, not calibrated. Optional SLM inference needs a locally
@@ -96,7 +96,7 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             if option == "--json" {
                 json = true;
             } else {
-                return Err(format!("unknown option '{option}' for eval"));
+                return Err(format!("unknown option '{option}' for {command}"));
             }
         }
         return if command == "doctor" {
@@ -163,13 +163,17 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             }
         }
         if let Some(effort) = &options.effort {
-            if !["minimal", "low", "medium", "high", "xhigh", "max"].contains(&effort.as_str()) {
-                return Err("unsupported effort label".to_string());
-            }
-            if options.agent == Agent::Claude
-                && !["low", "medium", "high", "max"].contains(&effort.as_str())
-            {
-                return Err("Claude effort must be low, medium, high, or max".to_string());
+            let levels: &[&str] = if options.agent == Agent::Claude {
+                &["low", "medium", "high", "xhigh", "max", "ultracode"]
+            } else {
+                &["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]
+            };
+            if !levels.contains(&effort.as_str()) {
+                return Err(format!(
+                    "unsupported {} effort; choose {}",
+                    options.agent.as_str(),
+                    levels.join(", ")
+                ));
             }
         }
         Ok(Action::Run(options))
@@ -183,7 +187,7 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
 
 fn next_value(args: &mut impl Iterator<Item = String>, option: &str) -> Result<String, String> {
     match args.next() {
-        Some(value) if !value.is_empty() && !value.starts_with("--") => Ok(value),
+        Some(value) if !value.is_empty() && !value.starts_with('-') => Ok(value),
         _ => Err(format!("missing value for {option}")),
     }
 }
@@ -226,7 +230,9 @@ mod tests {
     fn agent_specific_options_are_validated() {
         assert!(parse_words(&["run", "--agent", "claude", "--oss", "fix"]).is_err());
         assert!(parse_words(&["run", "--agent", "opencode", "--effort", "high", "fix"]).is_err());
-        assert!(parse_words(&["run", "--agent", "claude", "--effort", "xhigh", "fix"]).is_err());
+        assert!(parse_words(&["run", "--agent", "claude", "--effort", "minimal", "fix"]).is_err());
+        assert!(parse_words(&["run", "--agent", "claude", "--effort", "xhigh", "fix"]).is_ok());
+        assert!(parse_words(&["run", "--agent", "claude", "--effort", "ultracode", "fix"]).is_ok());
         assert!(parse_words(&["run", "--agent", "other", "fix"]).is_err());
         let Action::Run(options) = parse_words(&["run", "--agent", "opencode", "Fix bug"]).unwrap()
         else {
@@ -246,6 +252,9 @@ mod tests {
             Action::Doctor { json: true }
         );
         assert!(parse_words(&["doctor", "unexpected"]).is_err());
+        assert!(parse_words(&["doctor", "--bad"])
+            .unwrap_err()
+            .contains("for doctor"));
     }
 
     #[test]
@@ -283,6 +292,8 @@ mod tests {
         assert!(parse_words(&["route", "--model", "abc"]).is_err());
         assert!(parse_words(&["run", "--model"]).is_err());
         assert!(parse_words(&["route", "   "]).is_err());
+        assert!(parse_words(&["run", "--model", "-h", "fix"]).is_err());
+        assert!(parse_words(&["run", "--model", "-c", "fix"]).is_err());
     }
 
     #[test]

@@ -16,11 +16,7 @@ fn executable_exists(name: &str) -> bool {
     let Some(path) = env::var_os("PATH") else {
         return false;
     };
-    let suffixes: &[&str] = if cfg!(windows) {
-        &[".exe", ".cmd", ".bat", ""]
-    } else {
-        &[""]
-    };
+    let suffixes: &[&str] = if cfg!(windows) { &[".exe"] } else { &[""] };
     env::split_paths(&path).any(|directory| {
         suffixes.iter().any(|suffix| {
             let candidate = directory.join(format!("{name}{suffix}"));

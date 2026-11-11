@@ -23,6 +23,7 @@ pub fn claude_invocation(options: &Options) -> Invocation {
     if let Some(effort) = &options.effort {
         arguments.extend(["--effort".to_string(), effort.clone()]);
     }
+    arguments.push("--".to_string());
     arguments.push(options.prompt.clone());
     Invocation {
         executable: "claude",
@@ -86,7 +87,14 @@ impl Invocation {
         let status = Command::new(self.executable)
             .args(&self.arguments)
             .status()
-            .map_err(|error| format!("failed to start {}: {error}", self.executable))?;
+            .map_err(|error| {
+                let hint = if cfg!(windows) {
+                    "; put a native .exe on PATH (.cmd/.bat shims are not launched)"
+                } else {
+                    ""
+                };
+                format!("failed to start {}: {error}{hint}", self.executable)
+            })?;
         Ok(status.code().unwrap_or(1))
     }
 }
