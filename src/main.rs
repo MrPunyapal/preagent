@@ -59,8 +59,12 @@ fn main() -> ExitCode {
                 let slm_tier = suggested
                     .map(|tier| format!("\"{}\"", tier.as_str()))
                     .unwrap_or_else(|| "null".to_string());
+                let slm_error = fallback
+                    .as_deref()
+                    .map(slm::json_quote)
+                    .unwrap_or_else(|| "null".to_string());
                 println!(
-                    "{prefix},\"slm_status\":\"{status}\",\"slm_tier\":{slm_tier},\"recommended_tier\":\"{}\"}}",
+                    "{prefix},\"slm_status\":\"{status}\",\"slm_tier\":{slm_tier},\"slm_error\":{slm_error},\"recommended_tier\":\"{}\"}}",
                     recommended.as_str()
                 );
             } else {
