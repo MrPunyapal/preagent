@@ -29,6 +29,35 @@ fn git(dir: &Path, args: &[&str]) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
+fn reject_partial_clone(source: &Path) -> Result<(), String> {
+    if !source.is_dir() {
+        return Err("a local, already cloned repository directory is required".into());
+    }
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(source)
+        .args([
+            "config",
+            "--local",
+            "--get-regexp",
+            r"^(extensions\.partialClone|remote\..*\.(promisor|partialclonefilter))$",
+        ])
+        .output()
+        .map_err(|e| format!("git is not available: {e}"))?;
+    if output.status.success() && !output.stdout.is_empty() {
+        return Err(
+            "source is a partial Git clone and may fetch missing objects; use a complete local checkout".into(),
+        );
+    }
+    if !output.status.success() && output.status.code() != Some(1) {
+        return Err(format!(
+            "cannot inspect local Git clone configuration: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    Ok(())
+}
+
 fn verify_commit(case: Case, source: &Path) -> Result<(), String> {
     if !source.is_dir() {
         return Err("a local, already cloned repository directory is required".into());
@@ -98,6 +127,7 @@ fn clone_local_repo(source: &Path, output: &Path) -> Result<std::process::Output
 }
 
 pub fn prepare(case: Case, source: &Path, output: &Path) -> Result<String, String> {
+    reject_partial_clone(source)?;
     verify_commit(case, source)?;
     if fs::symlink_metadata(output).is_ok() {
         return Err("destination exists; never overwrite an existing directory".into());
@@ -310,6 +340,33 @@ mod tests {
             String::from_utf8_lossy(&result.stderr)
         );
         assert!(destination.join(".git").exists());
+    }
+
+    #[test]
+    fn partial_local_checkouts_are_rejected_before_clone() {
+        let scratch = Scratch::new().unwrap();
+        let source = scratch.0.join("partial-source");
+        fs::create_dir(&source).unwrap();
+        assert!(Command::new("git")
+            .args(["init", "--quiet"])
+            .current_dir(&source)
+            .status()
+            .unwrap()
+            .success());
+        for (key, value) in [
+            ("remote.origin.promisor", "true"),
+            ("remote.origin.partialclonefilter", "blob:none"),
+        ] {
+            assert!(Command::new("git")
+                .args(["config", "--local", key, value])
+                .current_dir(&source)
+                .status()
+                .unwrap()
+                .success());
+        }
+        let error = reject_partial_clone(&source).unwrap_err();
+        assert!(error.contains("partial Git clone"));
+        assert!(error.contains("complete local checkout"));
     }
 
     #[test]

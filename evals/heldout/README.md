@@ -24,7 +24,9 @@ to their terms. Do not publish changed upstream fixture checkouts as releases.
 ## Reproducibility / isolation
 
 1. Clone each **upstream** repository manually, or use an already cached local
-   checkout. The harness itself never clones remote URLs or downloads weights.
+   checkout with all Git objects available locally. Partial/promisor clones are
+   rejected because Git may need to fetch missing objects during a local clone.
+   The harness itself never clones remote URLs or downloads weights.
 2. Use `preagent heldout prepare <task-id> <local-upstream-checkout> <new-output-dir>`
    to make an isolated local clone pinned to the required commit and apply the
    checked-in regression patch. It refuses to overwrite an output directory.
