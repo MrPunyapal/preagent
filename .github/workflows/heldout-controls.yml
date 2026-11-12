@@ -1,0 +1,53 @@
+name: Held-out fixture controls
+
+on:
+  push:
+    paths:
+      - '.github/workflows/heldout-controls.yml'
+      - 'evals/heldout/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    name: Verify pinned fixture controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build offline-first harness
+        run: cargo build --release --locked
+      - name: Fetch public pinned source and free Cargo dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/preagent-controls"
+          git clone --quiet https://github.com/dtolnay/itoa.git "$RUNNER_TEMP/preagent-controls/itoa"
+          git clone --quiet https://github.com/dtolnay/ryu.git "$RUNNER_TEMP/preagent-controls/ryu"
+          git clone --quiet https://github.com/BurntSushi/byteorder.git "$RUNNER_TEMP/preagent-controls/byteorder"
+          git -C "$RUNNER_TEMP/preagent-controls/itoa" checkout --quiet --detach 9339ca99a43c550b5ee36e2afe524d1c90413461
+          git -C "$RUNNER_TEMP/preagent-controls/ryu" checkout --quiet --detach 75f9e707e77c89717ffb9c2a01fe2c28a016cc82
+          git -C "$RUNNER_TEMP/preagent-controls/byteorder" checkout --quiet --detach 5a82625fae462e8ba64cec8146b24a372b4d75c6
+          for name in itoa ryu byteorder; do
+            cargo fetch --manifest-path "$RUNNER_TEMP/preagent-controls/$name/Cargo.toml"
+          done
+      - name: Assert each clean source passes and each seeded regression fails
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin="$GITHUB_WORKSPACE/target/release/preagent"
+          base="$RUNNER_TEMP/preagent-controls"
+          for item in 'itoa-decimal-pairs:itoa' 'ryu-negative-infinity:ryu' 'byteorder-endian-read:byteorder' 'byteorder-signed-width:byteorder'; do
+            task="${item%%:*}"
+            source="${item#*:}"
+            echo "Checking $task"
+            clean="$($bin heldout grade "$task" "$base/$source")"
+            echo "$clean" | jq -e '.acceptance_status == "acceptance_passed"' >/dev/null
+            "$bin" heldout prepare "$task" "$base/$source" "$base/work-$task"
+            seeded="$($bin heldout grade "$task" "$base/work-$task")"
+            echo "$seeded" | jq -e '.acceptance_status == "acceptance_failed"' >/dev/null
+            echo "PASS $task: clean positive control, seeded negative control"
+          done
