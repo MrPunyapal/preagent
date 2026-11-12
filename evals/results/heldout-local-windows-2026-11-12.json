@@ -1,0 +1,1112 @@
+{
+  "evaluation_date": "2026-11-12",
+  "repository": "MrPunyapal/preagent",
+  "measurement_source_commit": "af7a318589e4f3c464a77687f303a794d4de95f1",
+  "working_tree_change_for_partial_clone_guard": "uncommitted at measurement time; does not affect route results",
+  "environment": {
+    "os": "Windows 11 Home Single Language",
+    "windows_build": "10.0.26300",
+    "architecture": "x86_64",
+    "cpu": "12th Gen Intel Core i7-12700H",
+    "logical_processors": 20,
+    "ram_total_gib": 15.63,
+    "ram_free_gib_at_routing_snapshot": 1.25,
+    "ram_free_gib_at_later_snapshot": 0.45,
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "gpu_vram_gib": 4,
+    "integrated_gpu": "Intel Iris Xe",
+    "rust": "1.96.1",
+    "cargo": "1.96.1",
+    "git": "2.45.2.windows.1",
+    "ollama": "0.32.5",
+    "visual_studio_instance": "Build Tools VS 18.12.0",
+    "msvc": "14.52.37025",
+    "windows_sdk": "10.0.26100.0",
+    "rust_target": "x86_64-pc-windows-msvc",
+    "codex_cli": "0.154.0",
+    "claude_code": "not installed",
+    "opencode": "not installed"
+  },
+  "smoke_evaluation": {
+    "corpus": "baseline",
+    "total": 45,
+    "correct": 45,
+    "accuracy": 1,
+    "baseline_tsv_git_blob": "8c766652d528f6165ec51a63d0cd885b4fd36949"
+  },
+  "heldout_manifest_git_blob": "1f8c1f7417220609b54a1a5c828f4794e4086760",
+  "doctor": {
+    "git": true,
+    "codex": true,
+    "claude": false,
+    "opencode": false,
+    "ollama_loopback": true
+  },
+  "deterministic": {
+    "agreement": "2/4",
+    "rows": [
+      {
+        "task": "itoa-decimal-pairs",
+        "expected": "standard",
+        "tier": "standard",
+        "median_rule_us": 21
+      },
+      {
+        "task": "ryu-negative-infinity",
+        "expected": "simple",
+        "tier": "simple",
+        "median_rule_us": 12.5
+      },
+      {
+        "task": "byteorder-endian-read",
+        "expected": "standard",
+        "tier": "simple",
+        "median_rule_us": 11
+      },
+      {
+        "task": "byteorder-signed-width",
+        "expected": "complex",
+        "tier": "standard",
+        "median_rule_us": 12.5
+      }
+    ],
+    "process_runs": {
+      "count": 12,
+      "median_wall_ms": 22.285,
+      "p95_wall_ms": 53.66,
+      "maximum_sampled_preagent_working_set_mib": 4.99,
+      "samples": [
+        {
+          "run": 1,
+          "wall_ms": 53.66,
+          "preagent_peak_mib": 0.03,
+          "rule_us": [
+            22,
+            11,
+            11,
+            12
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 2,
+          "wall_ms": 27.69,
+          "preagent_peak_mib": 3.46,
+          "rule_us": [
+            22,
+            13,
+            11,
+            12
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 3,
+          "wall_ms": 29.39,
+          "preagent_peak_mib": 3.89,
+          "rule_us": [
+            20,
+            11,
+            10,
+            11
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 4,
+          "wall_ms": 23.89,
+          "preagent_peak_mib": 4.91,
+          "rule_us": [
+            21,
+            12,
+            11,
+            12
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 5,
+          "wall_ms": 14.82,
+          "preagent_peak_mib": 4.99,
+          "rule_us": [
+            22,
+            12,
+            11,
+            12
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 6,
+          "wall_ms": 14.65,
+          "preagent_peak_mib": 3.89,
+          "rule_us": [
+            21,
+            13,
+            12,
+            13
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 7,
+          "wall_ms": 30.56,
+          "preagent_peak_mib": 4.98,
+          "rule_us": [
+            22,
+            13,
+            12,
+            13
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 8,
+          "wall_ms": 14.83,
+          "preagent_peak_mib": 4.97,
+          "rule_us": [
+            21,
+            13,
+            12,
+            14
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 9,
+          "wall_ms": 20.68,
+          "preagent_peak_mib": 4.96,
+          "rule_us": [
+            21,
+            12,
+            11,
+            13
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 10,
+          "wall_ms": 14.68,
+          "preagent_peak_mib": 4.86,
+          "rule_us": [
+            21,
+            12,
+            11,
+            12
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 11,
+          "wall_ms": 14.8,
+          "preagent_peak_mib": 4.86,
+          "rule_us": [
+            21,
+            13,
+            12,
+            13
+          ],
+          "agreement": 2,
+          "total": 4
+        },
+        {
+          "run": 12,
+          "wall_ms": 30.39,
+          "preagent_peak_mib": 4.08,
+          "rule_us": [
+            24,
+            14,
+            12,
+            14
+          ],
+          "agreement": 2,
+          "total": 4
+        }
+      ]
+    },
+    "one_route_output": {
+      "suite": "heldout-v1",
+      "platform": "windows",
+      "arch": "x86_64",
+      "slm_model": null,
+      "preagent_peak_rss_kib": null,
+      "rule_agreement": {
+        "correct": 2,
+        "total": 4
+      },
+      "slm_agreement": {
+        "correct": 0,
+        "valid": 0,
+        "unavailable": 0
+      },
+      "hybrid_agreement": {
+        "correct": 2,
+        "total": 4
+      },
+      "task_correctness": null,
+      "rows": [
+        {
+          "id": "itoa-decimal-pairs",
+          "human_tier": "standard",
+          "rule_tier": "standard",
+          "rule_us": 22,
+          "slm_tier": null,
+          "slm_ms": null,
+          "slm_status": "not_requested",
+          "hybrid_tier": "standard",
+          "task_correctness": null
+        },
+        {
+          "id": "ryu-negative-infinity",
+          "human_tier": "simple",
+          "rule_tier": "simple",
+          "rule_us": 11,
+          "slm_tier": null,
+          "slm_ms": null,
+          "slm_status": "not_requested",
+          "hybrid_tier": "simple",
+          "task_correctness": null
+        },
+        {
+          "id": "byteorder-endian-read",
+          "human_tier": "standard",
+          "rule_tier": "simple",
+          "rule_us": 11,
+          "slm_tier": null,
+          "slm_ms": null,
+          "slm_status": "not_requested",
+          "hybrid_tier": "simple",
+          "task_correctness": null
+        },
+        {
+          "id": "byteorder-signed-width",
+          "human_tier": "complex",
+          "rule_tier": "standard",
+          "rule_us": 12,
+          "slm_tier": null,
+          "slm_ms": null,
+          "slm_status": "not_requested",
+          "hybrid_tier": "standard",
+          "task_correctness": null
+        }
+      ]
+    }
+  },
+  "slm_models": [
+    {
+      "model_id": "qwen2.5-coder:0.5b",
+      "parameters": "494M",
+      "ollama_artifact_size": "397 MB",
+      "quantization": "Q4_K_M",
+      "license": "Apache-2.0",
+      "observed_loaded_gpu_allocation": "481 MB",
+      "model_absent_before_first_request": true,
+      "first_task_slm_ms": 1830.196,
+      "runs": [
+        {
+          "run": 1,
+          "process_wall_ms": 2453.8,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 65.2,
+          "ollama_process_cpu_seconds": 0.89,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:0.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 20,
+                "slm_tier": "simple",
+                "slm_ms": 1830.196,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 15,
+                "slm_tier": "simple",
+                "slm_ms": 176.333,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "simple",
+                "slm_ms": 173.766,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 17,
+                "slm_tier": "simple",
+                "slm_ms": 174.502,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 2,
+          "process_wall_ms": 794.8,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 63.2,
+          "ollama_process_cpu_seconds": 0.75,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:0.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 22,
+                "slm_tier": "simple",
+                "slm_ms": 167.035,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "simple",
+                "slm_ms": 177.802,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 18,
+                "slm_tier": "simple",
+                "slm_ms": 185.87,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 19,
+                "slm_tier": "simple",
+                "slm_ms": 189.684,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 3,
+          "process_wall_ms": 785.1,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 63.2,
+          "ollama_process_cpu_seconds": 0.7,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:0.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 21,
+                "slm_tier": "simple",
+                "slm_ms": 175.899,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "simple",
+                "slm_ms": 178.087,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "simple",
+                "slm_ms": 171.866,
+                "slm_status": "ok",
+                "hybrid_tier": "simple",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 17,
+                "slm_tier": "simple",
+                "slm_ms": 174.732,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "qwen2.5-coder:1.5b",
+      "parameters": "1.5B",
+      "ollama_artifact_size": "986 MB",
+      "quantization": "Q4_K_M",
+      "license": "Apache-2.0",
+      "observed_loaded_gpu_allocation": "1.2 GB",
+      "model_absent_before_first_request": true,
+      "first_task_slm_ms": 8659.394,
+      "runs": [
+        {
+          "run": 1,
+          "process_wall_ms": 9222.5,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 344.4,
+          "ollama_process_cpu_seconds": 0.92,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:1.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 3,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 3,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 20,
+                "slm_tier": "standard",
+                "slm_ms": 8659.394,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 15,
+                "slm_tier": "standard",
+                "slm_ms": 185.491,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "standard",
+                "slm_ms": 180.958,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 19,
+                "slm_tier": "complex",
+                "slm_ms": 181.023,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 2,
+          "process_wall_ms": 744.8,
+          "sampled_preagent_peak_working_set_mib": 5.27,
+          "sampled_combined_ollama_process_peak_working_set_mib": 63.5,
+          "ollama_process_cpu_seconds": 0.75,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:1.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 3,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 3,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 22,
+                "slm_tier": "standard",
+                "slm_ms": 176.785,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "standard",
+                "slm_ms": 176.08,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "standard",
+                "slm_ms": 178.471,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 18,
+                "slm_tier": "complex",
+                "slm_ms": 193.732,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 3,
+          "process_wall_ms": 782.1,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 62.9,
+          "ollama_process_cpu_seconds": 0.88,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:1.5b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 3,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 3,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 22,
+                "slm_tier": "standard",
+                "slm_ms": 178.794,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 17,
+                "slm_tier": "standard",
+                "slm_ms": 174.174,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 17,
+                "slm_tier": "standard",
+                "slm_ms": 174.456,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 18,
+                "slm_tier": "complex",
+                "slm_ms": 177.593,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "model_id": "qwen2.5-coder:3b",
+      "parameters": "3.1B",
+      "ollama_artifact_size": "1.9 GB",
+      "quantization": "Q4_K_M",
+      "license": "Qwen Research License",
+      "observed_loaded_gpu_allocation": "2.2 GB",
+      "model_absent_before_first_request": null,
+      "first_task_slm_ms": 4603.497,
+      "runs": [
+        {
+          "run": 1,
+          "process_wall_ms": 5280.2,
+          "sampled_preagent_peak_working_set_mib": 5.27,
+          "sampled_combined_ollama_process_peak_working_set_mib": 365.9,
+          "ollama_process_cpu_seconds": 0.86,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:3b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 1,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 21,
+                "slm_tier": "complex",
+                "slm_ms": 4603.497,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "standard",
+                "slm_ms": 195.561,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 17,
+                "slm_tier": "complex",
+                "slm_ms": 198.767,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 19,
+                "slm_tier": "complex",
+                "slm_ms": 205.282,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 2,
+          "process_wall_ms": 859.3,
+          "sampled_preagent_peak_working_set_mib": 5.29,
+          "sampled_combined_ollama_process_peak_working_set_mib": 62.2,
+          "ollama_process_cpu_seconds": 0.86,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:3b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 1,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 19,
+                "slm_tier": "complex",
+                "slm_ms": 198.791,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 17,
+                "slm_tier": "standard",
+                "slm_ms": 206.695,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 16,
+                "slm_tier": "complex",
+                "slm_ms": 213.997,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 17,
+                "slm_tier": "complex",
+                "slm_ms": 200.575,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        },
+        {
+          "run": 3,
+          "process_wall_ms": 808.8,
+          "sampled_preagent_peak_working_set_mib": 5.28,
+          "sampled_combined_ollama_process_peak_working_set_mib": 62.2,
+          "ollama_process_cpu_seconds": 0.59,
+          "route_output": {
+            "suite": "heldout-v1",
+            "platform": "windows",
+            "arch": "x86_64",
+            "slm_model": "qwen2.5-coder:3b",
+            "preagent_peak_rss_kib": null,
+            "rule_agreement": {
+              "correct": 2,
+              "total": 4
+            },
+            "slm_agreement": {
+              "correct": 1,
+              "valid": 4,
+              "unavailable": 0
+            },
+            "hybrid_agreement": {
+              "correct": 1,
+              "total": 4
+            },
+            "task_correctness": null,
+            "rows": [
+              {
+                "id": "itoa-decimal-pairs",
+                "human_tier": "standard",
+                "rule_tier": "standard",
+                "rule_us": 28,
+                "slm_tier": "complex",
+                "slm_ms": 201.106,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "ryu-negative-infinity",
+                "human_tier": "simple",
+                "rule_tier": "simple",
+                "rule_us": 18,
+                "slm_tier": "standard",
+                "slm_ms": 191.797,
+                "slm_status": "ok",
+                "hybrid_tier": "standard",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-endian-read",
+                "human_tier": "standard",
+                "rule_tier": "simple",
+                "rule_us": 17,
+                "slm_tier": "complex",
+                "slm_ms": 192.978,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              },
+              {
+                "id": "byteorder-signed-width",
+                "human_tier": "complex",
+                "rule_tier": "standard",
+                "rule_us": 19,
+                "slm_tier": "complex",
+                "slm_ms": 202.171,
+                "slm_status": "ok",
+                "hybrid_tier": "complex",
+                "task_correctness": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "slm_resource_notes": {
+    "preagent_working_set_sampling_interval_ms": 50,
+    "ollama_process_working_set_is_host_rss_not_model_vram": true,
+    "gpu_snapshot_after_runs": {
+      "utilization_percent": 29,
+      "vram_total_mib": 4096,
+      "vram_used_mib": 2152,
+      "vram_free_mib": 1811
+    },
+    "gpu_snapshot_is_peak": false,
+    "classification_timeout_or_fallbacks": 0,
+    "valid_responses": "36/36",
+    "seven_b_model": {
+      "installed": true,
+      "artifact_size": "4.7 GB",
+      "quantization": "Q4_K_M",
+      "tested": false,
+      "reason": "Only 0.45 GiB system RAM was free at the later snapshot and the model artifact exceeds 4 GiB VRAM; skipped to avoid memory pressure"
+    }
+  },
+  "acceptance_controls": {
+    "positive": [
+      {
+        "task": "itoa-decimal-pairs",
+        "status": "acceptance_passed",
+        "test_elapsed_ms": 12119
+      },
+      {
+        "task": "ryu-negative-infinity",
+        "status": "acceptance_passed",
+        "test_elapsed_ms": 15422
+      },
+      {
+        "task": "byteorder-endian-read",
+        "status": "acceptance_passed",
+        "test_elapsed_ms": 4757
+      },
+      {
+        "task": "byteorder-signed-width",
+        "status": "acceptance_passed",
+        "test_elapsed_ms": 7763
+      }
+    ],
+    "negative": [
+      {
+        "task_id": "itoa-decimal-pairs",
+        "pinned_commit": "9339ca99a43c550b5ee36e2afe524d1c90413461",
+        "acceptance_status": "acceptance_failed",
+        "test_exit_code": 101,
+        "test_elapsed_ms": 12819,
+        "copied_files": 16,
+        "copied_bytes": 369710,
+        "infrastructure_detail": "",
+        "task_correctness": null
+      },
+      {
+        "task_id": "ryu-negative-infinity",
+        "pinned_commit": "75f9e707e77c89717ffb9c2a01fe2c28a016cc82",
+        "acceptance_status": "acceptance_failed",
+        "test_exit_code": 101,
+        "test_elapsed_ms": 13094,
+        "copied_files": 41,
+        "copied_bytes": 573069,
+        "infrastructure_detail": "",
+        "task_correctness": null
+      },
+      {
+        "task_id": "byteorder-endian-read",
+        "pinned_commit": "5a82625fae462e8ba64cec8146b24a372b4d75c6",
+        "acceptance_status": "acceptance_failed",
+        "test_exit_code": 101,
+        "test_elapsed_ms": 4964,
+        "copied_files": 13,
+        "copied_bytes": 189184,
+        "infrastructure_detail": "",
+        "task_correctness": null
+      },
+      {
+        "task_id": "byteorder-signed-width",
+        "pinned_commit": "5a82625fae462e8ba64cec8146b24a372b4d75c6",
+        "acceptance_status": "acceptance_failed",
+        "test_exit_code": 101,
+        "test_elapsed_ms": 4939,
+        "copied_files": 13,
+        "copied_bytes": 189184,
+        "infrastructure_detail": "",
+        "task_correctness": null
+      }
+    ],
+    "candidate_tree_unchanged_after_grade": true,
+    "source_checkouts_clean": true,
+    "source_commits_match_manifest": true,
+    "fixture_source_partial_clone_guard_verified": true
+  },
+  "coding_task_correctness": {
+    "status": "not_tested",
+    "reason": "Claude Code/OpenCode unavailable; launching nested Codex from this active Codex session is prohibited; no paid/cloud agent used"
+  },
+  "artifact_paths": {
+    "report": "docs/heldout-windows-evaluation-2026-11-12.md",
+    "fixtures": "target/validation/local-heldout-v1-win-20261112",
+    "full_pinned_sources": "target/validation/pinned-upstream-full"
+  }
+}
