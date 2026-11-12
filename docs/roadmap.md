@@ -16,6 +16,13 @@ pass through a shell; unsupported options fail clearly.
 
 ## Milestone 2: Evaluation harness
 
+- A four-case frozen held-out pilot is separate from the smoke corpus.
+- Pinned repositories, license metadata, seeded patches, and hidden acceptance tests.
+- Offline local fixture preparation, isolated grading and explicit SLM comparisons.
+- Router and human labels must not be tuned using the pilot outcomes.
+- Expand to independently selected tasks and repeated agent runs before claiming performance improvements.
+
+
 - Extend the existing labeled routing smoke corpus with independently held-out tasks.
 - Compare agent defaults, rules-only routing, candidate SLM, and hybrid.
 - Track task correctness, prompt intent, user overrides, CPU/RAM and latency.

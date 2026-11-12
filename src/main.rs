@@ -3,6 +3,7 @@ mod cli;
 mod context;
 mod doctor;
 mod evaluation;
+mod heldout;
 mod router;
 mod slm;
 
@@ -81,6 +82,16 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Action::Run(options) => run(options),
+        Action::Heldout(command) => match heldout::run(command) {
+            Ok(report) => {
+                println!("{report}");
+                ExitCode::SUCCESS
+            }
+            Err(message) => {
+                eprintln!("preagent: heldout: {message}");
+                ExitCode::FAILURE
+            }
+        },
         Action::Doctor { json } => {
             let results = doctor::check();
             if json {

@@ -104,6 +104,32 @@ Git is installed, and whether Ollama responds on the loopback interface.
 The command never contacts cloud services or reveals credentials. It does
 not authenticate with or execute any of the detected coding agents.
 
+## Separate held-out evaluation pilot
+
+Four frozen regression-repair tasks from permissively licensed Rust projects
+are defined in [evals/heldout](evals/heldout/README.md). These cases are
+**not** part of the legacy 45-case smoke corpus. Human complexity labels
+are not coding-task success measures.
+
+    cargo run -- heldout list
+    cargo run -- heldout route --json
+    cargo run -- heldout route --json --slm qwen2.5-coder:1.5b
+
+The SLM command requires a locally installed model and a running Ollama.
+Neither command runs a coding agent or downloads models.
+
+Prepare a disposable local fixture from an existing pinned checkout, then
+grade it using hidden acceptance tests injected in a temporary snapshot:
+
+    cargo run -- heldout prepare itoa-decimal-pairs ../itoa ../scratch-itoa
+    cargo run -- heldout grade itoa-decimal-pairs ../scratch-itoa
+
+The source checkout must be at the commit recorded in the manifest, and the
+output must not exist. Grading uses cargo test --offline and leaves the
+candidate unchanged. Verify that the seeded fixture fails and the clean
+upstream baseline passes before attributing a passing result to agent work.
+See the task README for the full procedure.
+
 ## Routing smoke corpus
 
 Run `preagent eval` to classify the checked-in labeled scenarios in

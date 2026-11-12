@@ -28,6 +28,10 @@ jobs:
         run: cargo test --all-targets --locked
       - name: Evaluate routing smoke corpus
         run: cargo run --locked -- eval --json
+      - name: Validate frozen held-out task manifest
+        run: cargo run --locked -- heldout list --json
+      - name: Evaluate frozen held-out routing (no SLM)
+        run: cargo run --locked -- heldout route --json
       - name: Build
         run: cargo build --release --locked
       - name: Upload development binary

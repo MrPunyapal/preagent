@@ -39,6 +39,7 @@ pub enum Action {
     Run(Options),
     Eval { json: bool },
     Doctor { json: bool },
+    Heldout(crate::heldout::Command),
 }
 
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
@@ -50,6 +51,10 @@ USAGE
                  [--effort LEVEL] [--no-git] <prompt>
     preagent eval [--json]
     preagent doctor [--json]
+    preagent heldout list [--json]
+    preagent heldout route [--json] [--slm INSTALLED_MODEL]
+    preagent heldout prepare TASK LOCAL_CLONE NEW_DIRECTORY
+    preagent heldout grade TASK CANDIDATE_DIRECTORY
     preagent --help
     preagent --version
 
@@ -58,6 +63,7 @@ COMMANDS
     run      Start the selected coding agent with the ORIGINAL prompt.
     eval     Score the built-in, labeled routing smoke corpus (no AI calls).
     doctor   Report installed agents and loopback Ollama availability.
+    heldout  Frozen task evaluation without paid coding-agent runs.
 
 OPTIONS
     --json             Machine-readable route or evaluation output.
@@ -86,8 +92,12 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
     match command.as_str() {
         "-h" | "--help" | "help" => return Ok(Action::Help),
         "-V" | "--version" | "version" => return Ok(Action::Version),
-        "route" | "run" | "eval" | "doctor" => {}
+        "route" | "run" | "eval" | "doctor" | "heldout" => {}
         _ => return Err(format!("unknown command '{command}'")),
+    }
+
+    if command == "heldout" {
+        return crate::heldout::parse(args).map(Action::Heldout);
     }
 
     if command == "eval" || command == "doctor" {
@@ -255,6 +265,16 @@ mod tests {
         assert!(parse_words(&["doctor", "--bad"])
             .unwrap_err()
             .contains("for doctor"));
+    }
+
+    #[test]
+    fn heldout_parser_is_separate_from_legacy_smoke_evaluation() {
+        assert!(matches!(
+            parse_words(&["heldout", "list"]).unwrap(),
+            Action::Heldout(crate::heldout::Command::List { json: false })
+        ));
+        assert!(parse_words(&["heldout", "route", "--slm"]).is_err());
+        assert!(parse_words(&["heldout", "grade", "task"]).is_err());
     }
 
     #[test]

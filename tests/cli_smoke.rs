@@ -273,3 +273,23 @@ fn absent_agents_and_invalid_slm_fail_usefully_without_network() {
     assert!(stdout.contains("\"slm_error\":\"invalid local model identifier\""));
     assert!(stdout.contains("\"recommended_tier\":\"complex\""));
 }
+
+
+#[test]
+fn heldout_pilot_is_separate_from_smoke_and_has_no_agent_outcome() {
+    let listing = preagent(&["heldout", "list", "--json"]);
+    assert!(listing.status.success());
+    let list = String::from_utf8(listing.stdout).unwrap();
+    assert!(list.contains("\"suite\":\"heldout-v1\""));
+    assert!(list.contains("itoa-decimal-pairs"));
+
+    let output = preagent(&["heldout", "route", "--json"]);
+    assert!(output.status.success());
+    let route = String::from_utf8(output.stdout).unwrap();
+    assert!(route.contains("\"task_correctness\":null"));
+    assert!(route.contains("\"slm_model\":null"));
+    assert!(route.contains("\"slm_status\":\"not_requested\""));
+
+    let unknown = preagent(&["heldout", "prepare", "not-a-task", ".", "not-created"]);
+    assert!(!unknown.status.success());
+}
