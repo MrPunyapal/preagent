@@ -38,8 +38,6 @@ pub struct Case {
     pub repo: &'static str,
     pub sha: &'static str,
     pub license: &'static str,
-    pub patch_path: &'static str,
-    pub test_path: &'static str,
     pub prompt: &'static str,
 }
 
@@ -178,8 +176,6 @@ pub fn cases() -> Result<Vec<Case>, String> {
             repo,
             sha,
             license,
-            patch_path,
-            test_path,
             prompt,
         });
     }
