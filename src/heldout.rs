@@ -13,10 +13,22 @@ const MANIFEST: &str = include_str!("../evals/heldout/v1.tsv");
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
-    List { json: bool },
-    Route { json: bool, model: Option<String> },
-    Prepare { id: String, source: PathBuf, output: PathBuf },
-    Grade { id: String, candidate: PathBuf },
+    List {
+        json: bool,
+    },
+    Route {
+        json: bool,
+        model: Option<String>,
+    },
+    Prepare {
+        id: String,
+        source: PathBuf,
+        output: PathBuf,
+    },
+    Grade {
+        id: String,
+        candidate: PathBuf,
+    },
 }
 
 #[derive(Clone, Copy)]
@@ -32,7 +44,9 @@ pub struct Case {
 }
 
 pub fn parse(mut args: impl Iterator<Item = String>) -> Result<Command, String> {
-    let mode = args.next().ok_or("heldout requires list, route, prepare or grade")?;
+    let mode = args
+        .next()
+        .ok_or("heldout requires list, route, prepare or grade")?;
     match mode.as_str() {
         "list" => {
             let flags: Vec<String> = args.collect();
@@ -127,8 +141,7 @@ pub fn cases() -> Result<Vec<Case>, String> {
             return Err(format!("manifest line {} must have 8 columns", line_no + 1));
         }
         let [id, label, repo, sha, license, patch_path, test_path, prompt] =
-            <[&str; 8]>::try_from(parts.as_slice())
-                .map_err(|_| "manifest must have 8 columns")?;
+            <[&str; 8]>::try_from(parts.as_slice()).map_err(|_| "manifest must have 8 columns")?;
         if result.iter().any(|case: &Case| case.id == id) {
             return Err(format!("duplicate heldout task {id}"));
         }
@@ -144,15 +157,19 @@ pub fn cases() -> Result<Vec<Case>, String> {
         if prompt.trim().is_empty() || fixtures(id).is_none() {
             return Err(format!("task {id} has no description or fixtures"));
         }
-        if patch_path != format!("seeds/{id}.patch")
-            || test_path != format!("acceptance/{id}.rs")
-        {
+        if patch_path != format!("seeds/{id}.patch") || test_path != format!("acceptance/{id}.rs") {
             return Err(format!("task {id} fixture paths do not match its ID"));
         }
-        if !matches!(repo, "dtolnay/itoa" | "dtolnay/ryu" | "BurntSushi/byteorder") {
+        if !matches!(
+            repo,
+            "dtolnay/itoa" | "dtolnay/ryu" | "BurntSushi/byteorder"
+        ) {
             return Err(format!("task {id} references an unexpected repository"));
         }
-        if !matches!(license, "MIT OR Apache-2.0" | "Apache-2.0 OR BSL-1.0" | "Unlicense OR MIT") {
+        if !matches!(
+            license,
+            "MIT OR Apache-2.0" | "Apache-2.0 OR BSL-1.0" | "Unlicense OR MIT"
+        ) {
             return Err(format!("task {id} references an unexpected license"));
         }
         result.push(Case {
@@ -199,11 +216,16 @@ fn list(json: bool) -> Result<String, String> {
             .join(",");
         Ok(format!("{{\"suite\":\"heldout-v1\",\"tasks\":[{values}]}}"))
     } else {
-        let mut result = "Frozen heldout-v1 pilot: 4 independently labeled seeded regressions\n".to_string();
+        let mut result =
+            "Frozen heldout-v1 pilot: 4 independently labeled seeded regressions\n".to_string();
         for case in cases {
             result.push_str(&format!(
                 "{} [{}] {} @ {}\n  {}\n",
-                case.id, case.expected.as_str(), case.repo, case.sha, case.prompt
+                case.id,
+                case.expected.as_str(),
+                case.repo,
+                case.sha,
+                case.prompt
             ));
         }
         result.push_str("No agent is started; the frozen tier label is not a correctness test.");
@@ -273,12 +295,18 @@ fn route(json: bool, model: Option<&str>) -> Result<String, String> {
         });
     }
     if !json {
-        let mut out = format!("Frozen heldout-v1: {rules_correct}/{} rule-tier labels agreed\n", cases.len());
+        let mut out = format!(
+            "Frozen heldout-v1: {rules_correct}/{} rule-tier labels agreed\n",
+            cases.len()
+        );
         if model.is_some() {
             out.push_str(&format!(
                 "SLM: {slm_correct}/{slm_count} valid replies agreed, {unavailable} unavailable\n"
             ));
-            out.push_str(&format!("Hybrid: {hybrid_correct}/{} labels agreed (fallback included)\n", cases.len()));
+            out.push_str(&format!(
+                "Hybrid: {hybrid_correct}/{} labels agreed (fallback included)\n",
+                cases.len()
+            ));
         }
         for row in rows {
             out.push_str(&format!(
@@ -288,7 +316,9 @@ fn route(json: bool, model: Option<&str>) -> Result<String, String> {
                 row.rules.as_str(),
                 row.rules_us,
                 row.slm.map(Tier::as_str).unwrap_or(row.status),
-                row.slm_ms.map(|ms| format!("{ms:.3}")).unwrap_or_else(|| "n/a".into()),
+                row.slm_ms
+                    .map(|ms| format!("{ms:.3}"))
+                    .unwrap_or_else(|| "n/a".into()),
                 row.hybrid.as_str()
             ));
         }
@@ -311,7 +341,9 @@ fn route(json: bool, model: Option<&str>) -> Result<String, String> {
         .collect::<Vec<_>>()
         .join(",");
     let slm_model = model.map(slm::json_quote).unwrap_or_else(|| "null".into());
-    let peak = peak_rss_kib().map(|v| v.to_string()).unwrap_or_else(|| "null".into());
+    let peak = peak_rss_kib()
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| "null".into());
     Ok(format!(
         "{{\"suite\":\"heldout-v1\",\"platform\":{},\"arch\":{},\"slm_model\":{},\"preagent_peak_rss_kib\":{},\"rule_agreement\":{{\"correct\":{},\"total\":{}}},\"slm_agreement\":{{\"correct\":{},\"valid\":{},\"unavailable\":{}}},\"hybrid_agreement\":{{\"correct\":{},\"total\":{}}},\"task_correctness\":null,\"rows\":[{}]}}",
         slm::json_quote(std::env::consts::OS),
@@ -333,7 +365,9 @@ fn route(json: bool, model: Option<&str>) -> Result<String, String> {
 // Null is preferable to a fabricated estimate on other operating systems.
 fn peak_rss_kib() -> Option<u64> {
     let proc_status = std::fs::read_to_string("/proc/self/status").ok()?;
-    let value = proc_status.lines().find(|line| line.starts_with("VmHWM:"))?;
+    let value = proc_status
+        .lines()
+        .find(|line| line.starts_with("VmHWM:"))?;
     value.split_whitespace().nth(1)?.parse().ok()
 }
 
@@ -347,7 +381,10 @@ mod tests {
         let smoke = include_str!("../evals/baseline.tsv");
         assert_eq!(cases.len(), 4);
         for case in &cases {
-            assert!(!smoke.contains(case.prompt), "heldout task copied from smoke corpus");
+            assert!(
+                !smoke.contains(case.prompt),
+                "heldout task copied from smoke corpus"
+            );
             let (patch, test) = fixtures(case.id).unwrap();
             assert!(patch.contains("diff --git"));
             assert!(test.contains("#[test]"));

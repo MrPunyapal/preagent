@@ -20,7 +20,11 @@ fn git(dir: &Path, args: &[&str]) -> Result<String, String> {
         .output()
         .map_err(|e| format!("git is not available: {e}"))?;
     if !output.status.success() {
-        return Err(format!("git {} failed: {}", args.join(" "), String::from_utf8_lossy(&output.stderr)));
+        return Err(format!(
+            "git {} failed: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
@@ -44,7 +48,11 @@ fn apply_patch(destination: &Path, patch: &str, check: bool) -> Result<(), Strin
         .arg("-C")
         .arg(destination)
         .arg("apply")
-        .args(if check { vec!["--check", "-"] } else { vec!["-"] })
+        .args(if check {
+            vec!["--check", "-"]
+        } else {
+            vec!["-"]
+        })
         .stdin(Stdio::piped())
         .stdout(Stdio::null())
         .stderr(Stdio::piped())
@@ -56,7 +64,8 @@ fn apply_patch(destination: &Path, patch: &str, check: bool) -> Result<(), Strin
         .ok_or("cannot pipe patch to git apply")?
         .write_all(patch.as_bytes())
         .map_err(|e| format!("cannot feed patch: {e}"))?;
-    let result = child.wait_with_output()
+    let result = child
+        .wait_with_output()
         .map_err(|e| format!("cannot finish git apply: {e}"))?;
     if !result.status.success() {
         return Err(format!(
@@ -74,7 +83,9 @@ pub fn prepare(case: Case, source: &Path, output: &Path) -> Result<String, Strin
         return Err("destination exists; never overwrite an existing directory".into());
     }
     if !git(source, &["status", "--porcelain", "--untracked-files=no"])?.is_empty() {
-        return Err("source contains tracked working-tree changes; use a clean pinned checkout".into());
+        return Err(
+            "source contains tracked working-tree changes; use a clean pinned checkout".into(),
+        );
     }
     let source = fs::canonicalize(source)
         .map_err(|e| format!("cannot resolve local source directory: {e}"))?;
@@ -116,11 +127,8 @@ impl Scratch {
             .duration_since(UNIX_EPOCH)
             .map_err(|e| format!("invalid system clock: {e}"))?
             .as_nanos();
-        let path = std::env::temp_dir().join(format!(
-            "preagent-heldout-{}-{}",
-            std::process::id(),
-            now
-        ));
+        let path =
+            std::env::temp_dir().join(format!("preagent-heldout-{}-{}", std::process::id(), now));
         fs::create_dir(&path).map_err(|e| format!("cannot create grading scratch: {e}"))?;
         Ok(Self(path))
     }
@@ -151,11 +159,15 @@ fn copy_snapshot(source: &Path, dest: &Path, limits: &mut SnapshotLimits) -> Res
         let metadata = fs::symlink_metadata(&original)
             .map_err(|e| format!("cannot stat candidate entry: {e}"))?;
         if metadata.file_type().is_symlink() {
-            return Err(format!("candidate contains symlink at {}; refusing to follow it", original.display()));
+            return Err(format!(
+                "candidate contains symlink at {}; refusing to follow it",
+                original.display()
+            ));
         }
         let destination = dest.join(&name);
         if metadata.is_dir() {
-            fs::create_dir(&destination).map_err(|e| format!("cannot create grading directory: {e}"))?;
+            fs::create_dir(&destination)
+                .map_err(|e| format!("cannot create grading directory: {e}"))?;
             copy_snapshot(&original, &destination, limits)?;
         } else if metadata.is_file() {
             limits.files += 1;
@@ -166,7 +178,10 @@ fn copy_snapshot(source: &Path, dest: &Path, limits: &mut SnapshotLimits) -> Res
             fs::copy(&original, &destination)
                 .map_err(|e| format!("cannot copy candidate file: {e}"))?;
         } else {
-            return Err(format!("unsupported candidate entry {}", original.display()));
+            return Err(format!(
+                "unsupported candidate entry {}",
+                original.display()
+            ));
         }
     }
     Ok(())
@@ -188,7 +203,10 @@ fn cargo_acceptance(dir: &Path) -> Result<(String, i32, u128, String), String> {
         .spawn()
         .map_err(|e| format!("cargo unavailable for local acceptance grading: {e}"))?;
     let code = loop {
-        match child.try_wait().map_err(|e| format!("cannot poll cargo: {e}"))? {
+        match child
+            .try_wait()
+            .map_err(|e| format!("cannot poll cargo: {e}"))?
+        {
             Some(status) => break status.code().unwrap_or(1),
             None if started.elapsed() > GRADE_TIMEOUT => {
                 let _ = child.kill();
@@ -224,7 +242,9 @@ pub fn grade(case: Case, candidate: &Path) -> Result<String, String> {
     copy_snapshot(candidate, &scratch.0, &mut limits)?;
     let test_path = scratch.0.join("tests").join("preagent_holdout.rs");
     if test_path.exists() {
-        return Err("candidate already has tests/preagent_holdout.rs; refusing to overwrite".into());
+        return Err(
+            "candidate already has tests/preagent_holdout.rs; refusing to overwrite".into(),
+        );
     }
     fs::create_dir_all(test_path.parent().ok_or("invalid test path")?)
         .map_err(|e| format!("cannot create grading tests directory: {e}"))?;
