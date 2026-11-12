@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/heldout-windows-controls.yml'
       - 'evals/heldout/**'
+      - 'src/heldout.rs'
+      - 'src/heldout/**'
   workflow_dispatch:
 
 permissions:
