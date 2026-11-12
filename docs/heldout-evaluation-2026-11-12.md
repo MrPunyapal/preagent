@@ -174,3 +174,63 @@ already on the user's Windows machine, plus permissioned, non-paid
 end-to-end coding-agent trials where available. Record full provenance
 and keep outcomes separate from tier agreement. No hidden tuning against
 these four frozen labels.
+
+
+## Windows CI continuation after MSVC clone fix (12 November 2026)
+
+This subsection records **GitHub-hosted Windows validation**, not a rerun
+on the user's Windows 11 workstation. The user reports Visual Studio Build
+Tools 2022, MSVC x64/x86 tools and Windows 11 SDK are now installed locally.
+This installation was **not directly accessible or independently verified**
+from this environment. No local files, credentials or pending Codex changes
+were inspected or modified.
+
+- [Windows rules-only CI run 43203684926](https://github.com/MrPunyapal/preagent/actions/runs/43203684926)
+  passed compilation and held-out routing on Windows Server 2025
+  x86_64 with Rust 1.99.1 (`x86_64-pc-windows-msvc`).
+  Frozen tier-label agreement remained **2/4**. Per-task in-process
+  times (manifest order) were **54, 32, 29 and 35 microseconds**.
+  This is one CI-run sample, **not** inference latency or Windows
+  workstation speed. Windows process memory was not measured.
+  See [raw Windows routing data](../evals/results/heldout-ci-windows-2026-11-12.json).
+- [Windows controls run 43206322120](https://github.com/MrPunyapal/preagent/actions/runs/43206322120)
+  initially failed in fixture preparation: Git for Windows treated an
+  absolute `D:\\...` clone-source path as an scp-style remote and emitted
+  `hostname contains invalid characters`. That was a real harness
+  portability defect, **not** an absent compiler or failed coding task.
+- Commit [5ab61e6](https://github.com/MrPunyapal/preagent/commit/5ab61e69d37cc8c4085fc08f241e82def83e0568)
+  fixes local-only clones by using source directory `.` and preserving
+  the caller's absolute destination. It also adds a regression test.
+  Commit [ef46927](https://github.com/MrPunyapal/preagent/commit/ef46927d060f8d0b69fff2d17a13f3e0f3327985)
+  configures the Windows controls to rerun on held-out harness changes.
+- [Windows controls run 43206977924](https://github.com/MrPunyapal/preagent/actions/runs/43206977924)
+  **passed all four tasks**: for each task, the clean pinned upstream
+  fixture passed its acceptance tests and the deliberately seeded
+  regression failed them. This confirms positive/negative controls
+  on a Windows MSVC runner. Exact task IDs and results are saved in
+  [raw Windows control results](../evals/results/heldout-windows-controls-ci-2026-11-12.json).
+- [Cross-platform CI run 43206978180](https://github.com/MrPunyapal/preagent/actions/runs/43206978180)
+  passed on Linux, macOS and Windows, including formatting, Clippy,
+  tests, release builds, and deterministic routing checks.
+
+### Workstation evaluation still pending
+
+The completed CI runs **do not** verify the newly installed local
+Visual Studio Build Tools 2022 environment. No workstation SLM
+classification calls were made in this continuation. No local model
+was downloaded, and no paid/cloud agent was executed. The following
+are still **not measured on the workstation** for the held-out pilot:
+
+- MSVC x64 toolchain and Windows SDK executable discovery from the
+  local Codex terminal; local `cargo build --release --locked`.
+- Local deterministic and installed-SLM frozen-task routing under
+  the workstation's current hardware, with repeated latency and
+  memory measurements.
+- Local positive/negative fixture controls after a successful build,
+  including model/tool version provenance.
+- Actual agent repair attempts and graded coding-task correctness.
+  `task_correctness: null` means **not tested**, not failed.
+
+The existing `docs/windows-validation.md` documents earlier **smoke**
+measurements and cannot substitute for the new held-out work.
+Neither the frozen labels nor the 45-case smoke corpus were changed.

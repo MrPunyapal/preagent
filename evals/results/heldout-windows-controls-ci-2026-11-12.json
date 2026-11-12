@@ -1,0 +1,55 @@
+{
+  "suite": "heldout-v1",
+  "result_type": "windows_msvc_fixture_controls",
+  "provenance": {
+    "kind": "github_actions_hosted_windows",
+    "date": "2026-11-12",
+    "repository": "MrPunyapal/preagent",
+    "source_commit": "ef46927d060f8d0b69fff2d17a13f3e0f3327985",
+    "run_id": 43206977924,
+    "job_id": 131144510750,
+    "url": "https://github.com/MrPunyapal/preagent/actions/runs/43206977924",
+    "runner": "Windows Server 2025 / windows-latest",
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "toolchain": "x86_64-pc-windows-msvc",
+    "source": "GitHub Actions job logs",
+    "notes": "These are correctness controls of deliberately seeded defects on a hosted Windows runner, not local Windows 11 workstation measurements or actual agent-completed repairs."
+  },
+  "cases": [
+    {
+      "id": "itoa-decimal-pairs",
+      "clean": "acceptance_passed",
+      "seeded": "acceptance_failed",
+      "agent_attempted": false,
+      "task_correctness": null
+    },
+    {
+      "id": "ryu-negative-infinity",
+      "clean": "acceptance_passed",
+      "seeded": "acceptance_failed",
+      "agent_attempted": false,
+      "task_correctness": null
+    },
+    {
+      "id": "byteorder-endian-read",
+      "clean": "acceptance_passed",
+      "seeded": "acceptance_failed",
+      "agent_attempted": false,
+      "task_correctness": null
+    },
+    {
+      "id": "byteorder-signed-width",
+      "clean": "acceptance_passed",
+      "seeded": "acceptance_failed",
+      "agent_attempted": false,
+      "task_correctness": null
+    }
+  ],
+  "summary": {
+    "positive_controls_passed": 4,
+    "negative_controls_failed_as_expected": 4,
+    "agent_attempts": 0,
+    "local_slm_calls": 0,
+    "paid_agent_runs": 0
+  }
+}
