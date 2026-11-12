@@ -1,0 +1,12 @@
+diff --git a/src/buffer/mod.rs b/src/buffer/mod.rs
+--- a/src/buffer/mod.rs
++++ b/src/buffer/mod.rs
+@@ -6,7 +6,7 @@
+ 
+ const NAN: &str = "NaN";
+ const INFINITY: &str = "inf";
+-const NEG_INFINITY: &str = "-inf";
++const NEG_INFINITY: &str = "inf";
+ 
+ /// Safe API for formatting floating point numbers to text.
+ ///

@@ -1,0 +1,12 @@
+diff --git a/src/lib.rs b/src/lib.rs
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -1890,7 +1890,7 @@
+ impl ByteOrder for BigEndian {
+     #[inline]
+     fn read_u16(buf: &[u8]) -> u16 {
+-        u16::from_be_bytes(buf[..2].try_into().unwrap())
++        u16::from_le_bytes(buf[..2].try_into().unwrap())
+     }
+ 
+     #[inline]
