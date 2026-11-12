@@ -77,6 +77,26 @@ fn apply_patch(destination: &Path, patch: &str, check: bool) -> Result<(), Strin
     Ok(())
 }
 
+// Use "." from the source directory: on Windows an absolute "D:\\..." path
+// passed as the clone source may be interpreted as an scp-style remote.
+// Keep the destination absolute so relative caller paths are not re-based.
+fn clone_local_repo(source: &Path, output: &Path) -> Result<std::process::Output, String> {
+    let destination = if output.is_absolute() {
+        output.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map_err(|e| format!("cannot resolve destination directory: {e}"))?
+            .join(output)
+    };
+    Command::new("git")
+        .args(["clone", "--quiet", "--no-hardlinks", "--"])
+        .arg(".")
+        .arg(&destination)
+        .current_dir(source)
+        .output()
+        .map_err(|e| format!("git clone from local source failed: {e}"))
+}
+
 pub fn prepare(case: Case, source: &Path, output: &Path) -> Result<String, String> {
     verify_commit(case, source)?;
     if fs::symlink_metadata(output).is_ok() {
@@ -89,12 +109,7 @@ pub fn prepare(case: Case, source: &Path, output: &Path) -> Result<String, Strin
     }
     let source = fs::canonicalize(source)
         .map_err(|e| format!("cannot resolve local source directory: {e}"))?;
-    let copied = Command::new("git")
-        .args(["clone", "--quiet", "--no-hardlinks", "--"])
-        .arg(&source)
-        .arg(output)
-        .output()
-        .map_err(|e| format!("git clone from local source failed: {e}"))?;
+    let copied = clone_local_repo(&source, output)?;
     if !copied.status.success() {
         return Err(format!(
             "git clone from local source failed: {}",
@@ -274,6 +289,27 @@ mod tests {
         let case = super::super::cases().unwrap()[0];
         let error = prepare(case, Path::new("."), Path::new(".")).unwrap_err();
         assert!(error.contains("pinned") || error.contains("repository"));
+    }
+
+    #[test]
+    fn cloning_an_absolute_local_checkout_does_not_look_like_a_remote() {
+        let scratch = Scratch::new().unwrap();
+        let source = scratch.0.join("local-source");
+        let destination = scratch.0.join("cloned-workspace");
+        fs::create_dir(&source).unwrap();
+        assert!(Command::new("git")
+            .args(["init", "--quiet"])
+            .arg(&source)
+            .status()
+            .unwrap()
+            .success());
+        let result = clone_local_repo(&fs::canonicalize(&source).unwrap(), &destination).unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert!(destination.join(".git").exists());
     }
 
     #[test]
