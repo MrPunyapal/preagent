@@ -274,7 +274,6 @@ fn absent_agents_and_invalid_slm_fail_usefully_without_network() {
     assert!(stdout.contains("\"recommended_tier\":\"complex\""));
 }
 
-
 #[test]
 fn heldout_pilot_is_separate_from_smoke_and_has_no_agent_outcome() {
     let listing = preagent(&["heldout", "list", "--json"]);
