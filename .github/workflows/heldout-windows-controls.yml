@@ -1,0 +1,75 @@
+name: Windows held-out fixture controls
+
+on:
+  push:
+    paths:
+      - '.github/workflows/heldout-windows-controls.yml'
+      - 'evals/heldout/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    name: Validate pinned controls (Windows MSVC)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify Rust MSVC and build harness
+        run: |
+          $ErrorActionPreference = 'Stop'
+          rustc --version
+          cargo --version
+          cargo build --release --locked
+          if ($LASTEXITCODE -ne 0) { throw 'Rust MSVC build failed' }
+      - name: Fetch public pinned source and Cargo dependencies
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'preagent-heldout-windows'
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          $repositories = @(
+            @{ name='itoa'; url='https://github.com/dtolnay/itoa.git'; sha='9339ca99a43c550b5ee36e2afe524d1c90413461' },
+            @{ name='ryu'; url='https://github.com/dtolnay/ryu.git'; sha='75f9e707e77c89717ffb9c2a01fe2c28a016cc82' },
+            @{ name='byteorder'; url='https://github.com/BurntSushi/byteorder.git'; sha='5a82625fae462e8ba64cec8146b24a372b4d75c6' }
+          )
+          foreach ($repository in $repositories) {
+            $path = Join-Path $root $repository.name
+            git clone --quiet $repository.url $path
+            if ($LASTEXITCODE -ne 0) { throw "Cannot clone $($repository.name)" }
+            git -C $path checkout --quiet --detach $repository.sha
+            if ($LASTEXITCODE -ne 0) { throw "Cannot pin $($repository.name)" }
+            cargo fetch --manifest-path (Join-Path $path 'Cargo.toml')
+            if ($LASTEXITCODE -ne 0) { throw "Cannot fetch free dependencies for $($repository.name)" }
+          }
+      - name: Assert four positive and negative acceptance controls
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'preagent-heldout-windows'
+          $bin = Join-Path $env:GITHUB_WORKSPACE 'target/release/preagent.exe'
+          $cases = @(
+            @{ id='itoa-decimal-pairs'; source='itoa' },
+            @{ id='ryu-negative-infinity'; source='ryu' },
+            @{ id='byteorder-endian-read'; source='byteorder' },
+            @{ id='byteorder-signed-width'; source='byteorder' }
+          )
+          foreach ($case in $cases) {
+            $source = Join-Path $root $case.source
+            $seeded = Join-Path $root ("seeded-" + $case.id)
+            $clean = & $bin heldout grade $case.id $source | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0 -or $clean.acceptance_status -ne 'acceptance_passed') {
+              throw "Clean source control FAILED for $($case.id): $($clean | ConvertTo-Json -Compress)"
+            }
+            & $bin heldout prepare $case.id $source $seeded
+            if ($LASTEXITCODE -ne 0) { throw "Seed preparation FAILED for $($case.id)" }
+            $broken = & $bin heldout grade $case.id $seeded | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0 -or $broken.acceptance_status -ne 'acceptance_failed') {
+              throw "Seeded defect control FAILED for $($case.id): $($broken | ConvertTo-Json -Compress)"
+            }
+            Write-Output "PASS $($case.id): clean=acceptance_passed seeded=acceptance_failed"
+          }
