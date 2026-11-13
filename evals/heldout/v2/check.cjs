@@ -86,9 +86,24 @@ function evaluate(manifest, options = {}) {
     if (!isSafePath(r.crate_manifest)) fail(r.id + ': invalid crate manifest path');
     if (!nonempty(r.package) || !nonempty(r.declared_license) ||
         !nonempty(r.license_evidence)) fail(r.id + ': license/package metadata missing');
-    if (r.dependency_scope_status !== 'verified') {
-      block(r.id + ': dependency/license scope audit not independently verified');
+    if (!Array.isArray(r.packages) || r.packages.length < 1) {
+      fail(r.id + ': package scopes missing');
+    } else {
+      const scoped = new Set();
+      for (const p of r.packages) {
+        if (!nonempty(p.name) || scoped.has(p.name) ||
+            !isSafePath(p.manifest_path) ||
+            !nonempty(p.declared_license) ||
+            !nonempty(p.license_evidence)) {
+          fail(r.id + ': invalid or duplicate package scope');
+        }
+        scoped.add(p.name);
+        if (p.dependency_scope_status !== 'verified') {
+          block(r.id + '/' + p.name + ': transitive dependency/license scope not audited');
+        }
+      }
     }
+
   }
 
   const classes = new Map(CLASSES.map(x => [x, 0]));
@@ -127,7 +142,15 @@ function evaluate(manifest, options = {}) {
     } else classes.set(c.task_class, classes.get(c.task_class) + 1);
     if (!repos.has(c.repo_id)) {
       fail(String(c.id) + ': unknown repo ID');
-    } else perRepo.set(c.repo_id, perRepo.get(c.repo_id) + 1);
+    } else {
+      perRepo.set(c.repo_id, perRepo.get(c.repo_id) + 1);
+      const knownPackages = new Set((repos.get(c.repo_id).packages || []).map(x => x.name));
+      if (!Array.isArray(c.target_packages) || c.target_packages.length < 1 ||
+          new Set(c.target_packages).size !== c.target_packages.length ||
+          c.target_packages.some(x => !knownPackages.has(x))) {
+        fail(String(c.id) + ': target package scope is missing or unknown');
+      }
+    }
     if (!Array.isArray(c.source_paths) || !c.source_paths.length ||
         c.source_paths.some(p => !isSafePath(p))) {
       fail(String(c.id) + ': unsafe/missing source paths');

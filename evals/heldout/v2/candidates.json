@@ -21,7 +21,16 @@
       "package": "tokio",
       "declared_license": "MIT",
       "license_evidence": "https://github.com/tokio-rs/tokio/blob/ab0814fc8c62b3d8be40aad068e2fed6562cfeb0/tokio/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "tokio",
+          "manifest_path": "tokio/Cargo.toml",
+          "declared_license": "MIT",
+          "license_evidence": "https://github.com/tokio-rs/tokio/blob/ab0814fc8c62b3d8be40aad068e2fed6562cfeb0/tokio/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     },
     {
       "id": "serde",
@@ -31,7 +40,23 @@
       "package": "serde_core",
       "declared_license": "MIT OR Apache-2.0",
       "license_evidence": "https://github.com/serde-rs/serde/blob/aa7913ad0211fef960df68e7812a6211145a888c/serde_core/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "serde_core",
+          "manifest_path": "serde_core/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/serde-rs/serde/blob/aa7913ad0211fef960df68e7812a6211145a888c/serde_core/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "serde_derive",
+          "manifest_path": "serde_derive/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/serde-rs/serde/blob/aa7913ad0211fef960df68e7812a6211145a888c/serde_derive/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     },
     {
       "id": "ripgrep",
@@ -41,7 +66,37 @@
       "package": "globset",
       "declared_license": "Unlicense OR MIT",
       "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/crates/globset/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "globset",
+          "manifest_path": "crates/globset/Cargo.toml",
+          "declared_license": "Unlicense OR MIT",
+          "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/crates/globset/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "ignore",
+          "manifest_path": "crates/ignore/Cargo.toml",
+          "declared_license": "Unlicense OR MIT",
+          "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/crates/ignore/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "ripgrep",
+          "manifest_path": "Cargo.toml",
+          "declared_license": "Unlicense OR MIT",
+          "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "grep-printer",
+          "manifest_path": "crates/printer/Cargo.toml",
+          "declared_license": "Unlicense OR MIT",
+          "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/crates/printer/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     },
     {
       "id": "regex",
@@ -51,7 +106,30 @@
       "package": "regex-lite",
       "declared_license": "MIT OR Apache-2.0",
       "license_evidence": "https://github.com/rust-lang/regex/blob/3d79fe92666a9f191d7677ebc123ac165eac200c/regex-lite/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "regex-lite",
+          "manifest_path": "regex-lite/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/rust-lang/regex/blob/3d79fe92666a9f191d7677ebc123ac165eac200c/regex-lite/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "regex-syntax",
+          "manifest_path": "regex-syntax/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/rust-lang/regex/blob/3d79fe92666a9f191d7677ebc123ac165eac200c/regex-syntax/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        },
+        {
+          "name": "regex-automata",
+          "manifest_path": "regex-automata/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/rust-lang/regex/blob/3d79fe92666a9f191d7677ebc123ac165eac200c/regex-automata/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     },
     {
       "id": "clap",
@@ -61,7 +139,16 @@
       "package": "clap_builder",
       "declared_license": "MIT OR Apache-2.0",
       "license_evidence": "https://github.com/clap-rs/clap/blob/ec93e71255c0b833a34f50662a3fdb22f53f6ded/clap_builder/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "clap_builder",
+          "manifest_path": "clap_builder/Cargo.toml",
+          "declared_license": "MIT OR Apache-2.0",
+          "license_evidence": "https://github.com/clap-rs/clap/blob/ec93e71255c0b833a34f50662a3fdb22f53f6ded/clap_builder/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     },
     {
       "id": "hyper",
@@ -71,7 +158,16 @@
       "package": "hyper",
       "declared_license": "MIT",
       "license_evidence": "https://github.com/hyperium/hyper/blob/378f8479b8b703d098b46de1cec9ea648f12ea69/Cargo.toml",
-      "dependency_scope_status": "pending_transitive_license_audit"
+      "dependency_scope_status": "pending_transitive_license_audit",
+      "packages": [
+        {
+          "name": "hyper",
+          "manifest_path": "Cargo.toml",
+          "declared_license": "MIT",
+          "license_evidence": "https://github.com/hyperium/hyper/blob/378f8479b8b703d098b46de1cec9ea648f12ea69/Cargo.toml",
+          "dependency_scope_status": "pending_transitive_license_audit"
+        }
+      ]
     }
   ],
   "cases": [
@@ -100,7 +196,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "tokio-oneshot-cleanup",
@@ -127,7 +226,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "tokio-bounded-backpressure-tests",
@@ -154,7 +256,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "tokio-process-tree-cleanup",
@@ -181,7 +286,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "tokio-time-interval-coordination",
@@ -209,7 +317,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "tokio-scheduler-cancellation-boundary",
@@ -237,7 +348,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "tokio"
+      ]
     },
     {
       "id": "serde-numeric-range",
@@ -264,7 +378,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_core"
+      ]
     },
     {
       "id": "serde-serialize-container-sharing",
@@ -291,7 +408,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_core"
+      ]
     },
     {
       "id": "serde-derive-alias-coverage",
@@ -318,7 +438,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_derive"
+      ]
     },
     {
       "id": "serde-deny-unknown-fields",
@@ -345,7 +468,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_derive"
+      ]
     },
     {
       "id": "serde-derive-renames-roundtrip",
@@ -373,7 +499,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_derive"
+      ]
     },
     {
       "id": "serde-core-derive-visitor-boundary",
@@ -401,7 +530,11 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "serde_core",
+        "serde_derive"
+      ]
     },
     {
       "id": "ripgrep-escaped-glob-literal",
@@ -428,7 +561,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "globset"
+      ]
     },
     {
       "id": "ripgrep-ignore-precedence",
@@ -455,7 +591,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "ignore"
+      ]
     },
     {
       "id": "ripgrep-option-terminator-tests",
@@ -482,7 +621,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "ripgrep"
+      ]
     },
     {
       "id": "ripgrep-preprocessor-argv-safety",
@@ -509,7 +651,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "ripgrep"
+      ]
     },
     {
       "id": "ripgrep-json-printer-summary",
@@ -537,7 +682,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "grep-printer"
+      ]
     },
     {
       "id": "ripgrep-walker-policy-isolation",
@@ -565,7 +713,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "ignore"
+      ]
     },
     {
       "id": "regex-escaped-class-range",
@@ -592,7 +743,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-syntax"
+      ]
     },
     {
       "id": "regex-meta-search-consistency",
@@ -619,7 +773,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-automata"
+      ]
     },
     {
       "id": "regex-utf8-boundary-tests",
@@ -646,7 +803,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-lite"
+      ]
     },
     {
       "id": "regex-regex-size-limit",
@@ -673,7 +833,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-automata"
+      ]
     },
     {
       "id": "regex-unicode-flag-crossmodule",
@@ -701,7 +864,11 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-syntax",
+        "regex-automata"
+      ]
     },
     {
       "id": "regex-engine-selection-contract",
@@ -729,7 +896,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "regex-automata"
+      ]
     },
     {
       "id": "clap-option-terminator",
@@ -756,7 +926,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "clap-help-layout-refactor",
@@ -783,7 +956,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "clap-alias-validation-tests",
@@ -810,7 +986,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "clap-argv-literal-safety",
@@ -837,7 +1016,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "clap-usage-help-agreement",
@@ -865,7 +1047,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "clap-builder-parser-separation",
@@ -893,7 +1078,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "clap_builder"
+      ]
     },
     {
       "id": "hyper-chunked-extensions",
@@ -920,7 +1108,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     },
     {
       "id": "hyper-header-parse-refactor",
@@ -947,7 +1138,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     },
     {
       "id": "hyper-pipelining-regression-tests",
@@ -974,7 +1168,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     },
     {
       "id": "hyper-ambiguous-framing-rejection",
@@ -1001,7 +1198,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     },
     {
       "id": "hyper-eof-coordination",
@@ -1029,7 +1229,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     },
     {
       "id": "hyper-conn-dispatch-boundary",
@@ -1057,7 +1260,10 @@
       "controls": {
         "clean": null,
         "seeded": null
-      }
+      },
+      "target_packages": [
+        "hyper"
+      ]
     }
   ]
 }

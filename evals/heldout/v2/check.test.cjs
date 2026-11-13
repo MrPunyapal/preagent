@@ -50,6 +50,21 @@ test('duplicate cases and unbalanced class coverage cannot pass', () => {
   assert.ok(result.faults.some(x => x.includes('duplicate')));
 });
 
+test('every task identifies a declared target package scope', () => {
+  const data = load();
+  const report = evaluate(data);
+  assert.equal(report.schema_valid, true, report.faults.join('\n'));
+  for (const task of data.cases) {
+    const repo = data.repositories.find(x => x.id === task.repo_id);
+    assert.ok(task.target_packages.length >= 1, task.id);
+    for (const pkg of task.target_packages) {
+      assert.ok(repo.packages.some(x => x.name === pkg), task.id + ' ' + pkg);
+    }
+  }
+  data.cases[0].target_packages = ['unrecognized-package'];
+  assert.equal(evaluate(data).schema_valid, false);
+});
+
 test('premature frozen status is rejected', () => {
   const data = load();
   data.status = 'frozen';

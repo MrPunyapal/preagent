@@ -24,8 +24,9 @@ node evals/heldout/v2/check.cjs ready --json
 
 ## What is verified
 
-- Six pinned SHA-1 Git commit IDs and package-level permissive license
-  declarations were checked against upstream `Cargo.toml` files.
+- Six pinned SHA-1 Git commit IDs and relevant subcrate-level permissive
+  license declarations were checked against upstream package manifests.
+  Each task records the exact target package(s), not just the repository root.
 - Named Rust source paths correspond to inspected upstream areas. This is
   not yet a full case-by-case behavioral validation.
 - Each task has a concrete prompt, a seeding plan and two acceptance criteria.
