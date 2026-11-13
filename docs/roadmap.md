@@ -30,6 +30,17 @@ pass through a shell; unsupported options fail clearly.
 
 Acceptance: an independent contributor can reproduce the comparison.
 
+### Held-out v2 candidate preparation (not frozen)
+
+- A separate 36-case candidate registry exists at `evals/heldout/v2/`.
+- All six source revisions and 12 package-level licenses have been checked;
+  historical issue selection, dependency-scope audits and executable controls
+  are still pending.
+- Freeze requires 36 verified seed/acceptance pairs, independent human
+  reviewer labels (disagreements preserved), and signed content hashes.
+- No model or routing outcome may be reported against the candidate set.
+- See `docs/heldout-v2-preparation-2026-11-13.md` for specific blockers.
+
 ## Milestone 3: Optional local SLM
 
 - Evaluate compact, permissively licensed quantized models.
