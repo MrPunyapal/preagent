@@ -72,6 +72,7 @@ test('premature frozen status is rejected', () => {
   assert.equal(result.ready, false);
   assert.equal(result.schema_valid, false);
   assert.ok(result.faults.some(x => x.includes('frozen status prohibited')));
+  assert.ok(result.faults.some(x => x.includes('freeze.lock.json')));
 });
 
 test('reviewer disagreement must remain in the record, not a fabricated consensus', () => {

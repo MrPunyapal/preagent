@@ -216,6 +216,38 @@ function evaluate(manifest, options = {}) {
 
   const structural = faults.length === 0;
   const ready = structural && blockers.length === 0;
+  if (manifest.status === 'frozen') {
+    // Freeze is a separately reviewed content lock, never just an editable flag.
+    const lockPath = path.join(dir, 'freeze.lock.json');
+    if (!fs.existsSync(lockPath)) {
+      fail('frozen status requires a separately reviewed freeze.lock.json');
+    } else {
+      try {
+        const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+        const hashText = value => crypto.createHash('sha256')
+          .update(value.toString('utf8').replace(/\\r\\n/g, '\\n'))
+          .digest('hex');
+        const manifestBytes = fs.readFileSync(path.join(dir, 'candidates.json'));
+        if (lock.manifest_sha256 !== hashText(manifestBytes)) {
+          fail('frozen manifest SHA-256 does not match its lock');
+        }
+        const required = cases.flatMap(c => [c.seed_patch, c.withheld_acceptance_test])
+          .filter(Boolean);
+        if (!lock.files || Object.keys(lock.files).length !== required.length ||
+            required.some(f => !isSafePath(f) || !fs.existsSync(path.join(dir, f)) ||
+              lock.files[f] !== hashText(fs.readFileSync(path.join(dir, f))))) {
+          fail('frozen seed/acceptance hashes incomplete or inconsistent');
+        }
+        const signatures = lock.human_signoffs || [];
+        if (!Array.isArray(signatures) || new Set(signatures.map(s => s.reviewer_id)).size < 2 ||
+            signatures.some(s => !nonempty(s.reviewer_id) || !nonempty(s.signed_at))) {
+          fail('frozen content lock lacks two independent recorded signoffs');
+        }
+      } catch (error) {
+        fail('cannot verify frozen content lock: ' + error.message);
+      }
+    }
+  }
   if (manifest.status === 'frozen' && !ready) fail('frozen status prohibited before readiness gates pass');
   if (manifest.status === 'candidate_not_frozen' && ready) {
     block('reviewed/verified task set requires a separate frozen lock and human signoff');
