@@ -225,7 +225,7 @@ function evaluate(manifest, options = {}) {
       try {
         const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
         const hashText = value => crypto.createHash('sha256')
-          .update(value.toString('utf8').replace(/\\r\\n/g, '\\n'))
+          .update(value.toString('utf8').replace(/\r\n/g, '\n'))
           .digest('hex');
         const manifestBytes = fs.readFileSync(path.join(dir, 'candidates.json'));
         if (lock.manifest_sha256 !== hashText(manifestBytes)) {
