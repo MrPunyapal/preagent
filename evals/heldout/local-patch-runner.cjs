@@ -500,4 +500,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { validatePatch, parseSeed, validRelativePath, applyValidatedPatch };
+module.exports = { validatePatch, parseSeed, validRelativePath, applyValidatedPatch, loadTask };

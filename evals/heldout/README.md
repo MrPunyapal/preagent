@@ -108,3 +108,35 @@ already installed, refuses to interfere when another model is loaded, sets
 uses a fixed single attempt. Invalid or unsafe model patches are recorded
 without application or retry. This measures constrained patch generation, not
 autonomous agent tool use or the effect of Preagent routing on model selection.
+
+### Local bounded tool-agent experiment
+
+`local-tool-agent.cjs` tests whether an installed Ollama model can complete a
+small coding workflow through a runner-owned allowlist. The runner permits
+reading the one seed-touched source file, applying one validated patch to that
+file, and invoking only `cargo test --offline --quiet`. It never executes
+model-generated commands. The acceptance grader runs after the model session
+ends and its test source is not included in the candidate workspace. On
+Windows, timed-out fixed commands are stopped with process-tree cleanup.
+
+Some local models may return a JSON-looking tool intent in ordinary assistant
+text rather than Ollama's structured `tool_calls` field. The runner validates
+and dispatches only the first exact JSON intent in each response, then gives
+the model the result before requesting its next action. Any additional intents
+in that response are recorded and discarded. This is a bounded local tool
+loop; it is distinct from native API tool calling and from the patch-generation
+experiment above. Malformed intents, protocol violations, and exhausted turn
+limits are recorded as failures without retry. Each task uses a new candidate
+copied from its original seeded fixture, and attempt directories are never
+overwritten.
+
+Example (one fixed attempt):
+
+```powershell
+node evals/heldout/local-tool-agent.cjs --task ryu-negative-infinity `
+  --model qwen2.5-coder:1.5b --preagent .\target\release\preagent.exe
+```
+
+Raw prompts, model replies, tool requests/results, per-turn Ollama timings,
+patches, public-test results, and final acceptance outcomes are saved under
+`target/validation/local-tool-agent-attempts/`.
