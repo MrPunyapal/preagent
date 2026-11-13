@@ -25,6 +25,13 @@ test('v1 and smoke remain at their frozen Git blob IDs', () => {
   assert.equal(gitBlobSha(smoke), '8c766652d528f6165ec51a63d0cd885b4fd36949');
 });
 
+test('Git blob protection allows CRLF checkout without changing task text', () => {
+  const {pilot, smoke} = readFrozenInputs();
+  const toCrLf = bytes => Buffer.from(bytes.toString('utf8').replace(/\r?\n/g, '\r\n'));
+  assert.equal(gitBlobSha(toCrLf(pilot)), gitBlobSha(pilot));
+  assert.equal(gitBlobSha(toCrLf(smoke)), gitBlobSha(smoke));
+});
+
 test('invalid or traversing source paths are rejected before any grading', () => {
   for (const bad of ['../other.rs','/etc/passwd','C:\\temp\\file.rs','dir//file.rs','a/./b','']) {
     assert.equal(isSafePath(bad), false, bad);

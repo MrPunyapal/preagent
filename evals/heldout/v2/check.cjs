@@ -15,7 +15,10 @@ const FROZEN_V1_BLOB = '1f8c1f7417220609b54a1a5c828f4794e4086760';
 const FROZEN_SMOKE_BLOB = '8c766652d528f6165ec51a63d0cd885b4fd36949';
 
 function gitBlobSha(data) {
-  const bytes = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  // TSV files are text: Git for Windows may check them out with CRLF.
+  // Hash the canonical LF form to compare with the immutable Git blob.
+  const raw = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  const bytes = Buffer.from(raw.toString('utf8').replace(/\r\n/g, '\n'));
   return crypto.createHash('sha1')
     .update('blob ' + bytes.length + '\0')
     .update(bytes)
