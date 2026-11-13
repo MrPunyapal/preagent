@@ -1,0 +1,1063 @@
+{
+  "schema_version": 2,
+  "name": "heldout-v2",
+  "status": "candidate_not_frozen",
+  "selection_method": "Task designs proposed from source areas and pinned permissively licensed upstream revisions. No router or model outcomes were used for selection. These are NOT verified upstream issues or historical fixes.",
+  "model_results": null,
+  "task_classes": [
+    "bug_fix",
+    "refactoring",
+    "test_improvements",
+    "security_sensitive",
+    "multi_file",
+    "architecture"
+  ],
+  "repositories": [
+    {
+      "id": "tokio",
+      "github": "tokio-rs/tokio",
+      "revision": "ab0814fc8c62b3d8be40aad068e2fed6562cfeb0",
+      "crate_manifest": "tokio/Cargo.toml",
+      "package": "tokio",
+      "declared_license": "MIT",
+      "license_evidence": "https://github.com/tokio-rs/tokio/blob/ab0814fc8c62b3d8be40aad068e2fed6562cfeb0/tokio/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    },
+    {
+      "id": "serde",
+      "github": "serde-rs/serde",
+      "revision": "aa7913ad0211fef960df68e7812a6211145a888c",
+      "crate_manifest": "serde_core/Cargo.toml",
+      "package": "serde_core",
+      "declared_license": "MIT OR Apache-2.0",
+      "license_evidence": "https://github.com/serde-rs/serde/blob/aa7913ad0211fef960df68e7812a6211145a888c/serde_core/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    },
+    {
+      "id": "ripgrep",
+      "github": "BurntSushi/ripgrep",
+      "revision": "178cc027e283fd965cb72d0a7395b219eada170c",
+      "crate_manifest": "crates/globset/Cargo.toml",
+      "package": "globset",
+      "declared_license": "Unlicense OR MIT",
+      "license_evidence": "https://github.com/BurntSushi/ripgrep/blob/178cc027e283fd965cb72d0a7395b219eada170c/crates/globset/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    },
+    {
+      "id": "regex",
+      "github": "rust-lang/regex",
+      "revision": "3d79fe92666a9f191d7677ebc123ac165eac200c",
+      "crate_manifest": "regex-lite/Cargo.toml",
+      "package": "regex-lite",
+      "declared_license": "MIT OR Apache-2.0",
+      "license_evidence": "https://github.com/rust-lang/regex/blob/3d79fe92666a9f191d7677ebc123ac165eac200c/regex-lite/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    },
+    {
+      "id": "clap",
+      "github": "clap-rs/clap",
+      "revision": "ec93e71255c0b833a34f50662a3fdb22f53f6ded",
+      "crate_manifest": "clap_builder/Cargo.toml",
+      "package": "clap_builder",
+      "declared_license": "MIT OR Apache-2.0",
+      "license_evidence": "https://github.com/clap-rs/clap/blob/ec93e71255c0b833a34f50662a3fdb22f53f6ded/clap_builder/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    },
+    {
+      "id": "hyper",
+      "github": "hyperium/hyper",
+      "revision": "378f8479b8b703d098b46de1cec9ea648f12ea69",
+      "crate_manifest": "Cargo.toml",
+      "package": "hyper",
+      "declared_license": "MIT",
+      "license_evidence": "https://github.com/hyperium/hyper/blob/378f8479b8b703d098b46de1cec9ea648f12ea69/Cargo.toml",
+      "dependency_scope_status": "pending_transitive_license_audit"
+    }
+  ],
+  "cases": [
+    {
+      "id": "tokio-timeout-deadline",
+      "task_class": "bug_fix",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/time/timeout.rs"
+      ],
+      "prompt": "Repair a planted timeout boundary regression so a future that has completed before its deadline is not reported as elapsed.",
+      "acceptance_criteria": [
+        "Under paused time, a ready future yields its value at the deadline boundary; an actually pending future expires.",
+        "No spurious extra wake or completion is observed when the task is polled repeatedly."
+      ],
+      "seed_plan": "Change the completion-vs-expiration ordering in the timeout path.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "tokio-oneshot-cleanup",
+      "task_class": "refactoring",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/sync/oneshot.rs"
+      ],
+      "prompt": "Remove a planted duplication in the oneshot closed-state cleanup path while preserving cancellation, notification and ownership semantics.",
+      "acceptance_criteria": [
+        "Dropping the sender wakes the receiver and returns its closed result; dropping the receiver notifies the sender.",
+        "No double delivery or lost wake appears under repeated cancellation and send/receive orders."
+      ],
+      "seed_plan": "Introduce duplicated state-handling logic across the close/drop paths.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "tokio-bounded-backpressure-tests",
+      "task_class": "test_improvements",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/sync/mpsc/bounded.rs"
+      ],
+      "prompt": "Restore missing bounded-channel regression coverage for capacity-one backpressure and sender shutdown.",
+      "acceptance_criteria": [
+        "A restored regression test asserts that a second send waits until capacity frees.",
+        "A separate assertion checks receiver closure and pending sender resolution after the last receiver drops."
+      ],
+      "seed_plan": "Remove selected existing backpressure/shutdown assertions from upstream tests; require restored coverage.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "tokio-process-tree-cleanup",
+      "task_class": "security_sensitive",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/process/mod.rs"
+      ],
+      "prompt": "Repair a seeded child-process cleanup regression so opt-in kill-on-drop cannot leave an unintended child process running.",
+      "acceptance_criteria": [
+        "On the supported test platform, dropping a configured child requests termination and the process exits.",
+        "The default behavior for child processes without kill-on-drop remains unchanged."
+      ],
+      "seed_plan": "Disable or invert a kill-on-drop cleanup guard; run only a fixed test executable.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "tokio-time-interval-coordination",
+      "task_class": "multi_file",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/time/interval.rs",
+        "tokio/src/time/sleep.rs"
+      ],
+      "prompt": "Repair coordinated interval and sleep scheduling after a planted change that mishandles missed ticks under paused time.",
+      "acceptance_criteria": [
+        "MissedTickBehavior::Skip and Burst remain observably distinct after advancing a paused clock.",
+        "Sleeping and interval consumers still wake in the expected order across a large time jump."
+      ],
+      "seed_plan": "Introduce incompatible missed-tick bookkeeping in interval and sleep paths.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "tokio-scheduler-cancellation-boundary",
+      "task_class": "architecture",
+      "repo_id": "tokio",
+      "source_paths": [
+        "tokio/src/runtime/scheduler/current_thread/mod.rs",
+        "tokio/src/runtime/scheduler/multi_thread/worker.rs"
+      ],
+      "prompt": "Restore a scheduler cancellation invariant shared by current-thread and multi-thread paths without changing the public runtime API.",
+      "acceptance_criteria": [
+        "Cancelled tasks cannot complete a user-visible action after cancellation is observed.",
+        "Both scheduler modes progress unrelated ready work under a bounded deterministic workload."
+      ],
+      "seed_plan": "Plant independent cancellation-boundary defects in both scheduling modes.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-numeric-range",
+      "task_class": "bug_fix",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_core/src/de/impls.rs"
+      ],
+      "prompt": "Repair a seeded numeric deserialization regression that accepts an integer outside the destination type's range.",
+      "acceptance_criteria": [
+        "The destination type rejects both over-maximum and under-minimum integer inputs.",
+        "Boundary integer values still deserialize correctly without truncation or wrapping."
+      ],
+      "seed_plan": "Remove one checked integer-conversion boundary during deserialization.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-serialize-container-sharing",
+      "task_class": "refactoring",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_core/src/ser/impls.rs"
+      ],
+      "prompt": "Consolidate planted duplicated sequence-serialization control flow while retaining all emitted element and end markers.",
+      "acceptance_criteria": [
+        "A recording serializer sees the same element order and sequence length for arrays and slices.",
+        "Serializer errors propagate unchanged and serialization remains compatible with no_std where supported."
+      ],
+      "seed_plan": "Introduce equivalent duplicated sequence iteration paths requiring a shared helper.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-derive-alias-coverage",
+      "task_class": "test_improvements",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_derive/src/de.rs"
+      ],
+      "prompt": "Restore test coverage for a derived field alias and its default-value interaction.",
+      "acceptance_criteria": [
+        "A regression test verifies the alias deserializes into the intended field without changing the canonical field name.",
+        "A second assertion verifies the configured default applies only when both canonical name and alias are absent."
+      ],
+      "seed_plan": "Remove selected alias/default regression assertions from upstream test coverage.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-deny-unknown-fields",
+      "task_class": "security_sensitive",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_derive/src/de.rs"
+      ],
+      "prompt": "Repair a planted rejection-bypass in a derived type using deny_unknown_fields, without rejecting valid known fields.",
+      "acceptance_criteria": [
+        "Unexpected fields in adversarial input are rejected rather than silently accepted.",
+        "Known fields and configured aliases continue to deserialize normally."
+      ],
+      "seed_plan": "Bypass one unknown-field rejection path in generated deserializer logic.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-derive-renames-roundtrip",
+      "task_class": "multi_file",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_derive/src/de.rs",
+        "serde_derive/src/ser.rs"
+      ],
+      "prompt": "Repair a cross-direction rename regression so derived Serialize and Deserialize agree on a renamed variant and field.",
+      "acceptance_criteria": [
+        "Serializing then deserializing the test enum preserves the intended variant and field value.",
+        "The external field/variant names remain identical in both directions; legacy aliases work where configured."
+      ],
+      "seed_plan": "Break generated rename handling independently in derive/ser and derive/de.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "serde-core-derive-visitor-boundary",
+      "task_class": "architecture",
+      "repo_id": "serde",
+      "source_paths": [
+        "serde_core/src/de/mod.rs",
+        "serde_derive/src/de.rs"
+      ],
+      "prompt": "Restore the boundary between generated Deserialize code and Serde's visitor contract after a planted architectural regression.",
+      "acceptance_criteria": [
+        "A custom visitor receives exactly one completed visit for valid struct input and handles errors correctly.",
+        "The generated deserializer does not bypass visitor error handling or change the public trait contract."
+      ],
+      "seed_plan": "Move a validation path out of the visitor boundary in generated deserialization.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-escaped-glob-literal",
+      "task_class": "bug_fix",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/globset/src/glob.rs"
+      ],
+      "prompt": "Repair a planted glob-escape regression so escaped metacharacters match literally.",
+      "acceptance_criteria": [
+        "Escaped brace, bracket and question-mark patterns match their literal target paths.",
+        "Unescaped wildcard and brace expansion patterns continue to match according to glob syntax."
+      ],
+      "seed_plan": "Alter escape interpretation for one metacharacter family.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-ignore-precedence",
+      "task_class": "refactoring",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/ignore/src/gitignore.rs"
+      ],
+      "prompt": "Consolidate a deliberately duplicated ignore-rule precedence path without changing parent/child override behavior.",
+      "acceptance_criteria": [
+        "Negated child rules override applicable parent ignore patterns exactly where allowed.",
+        "Directory-only patterns and nested ignore files preserve documented precedence."
+      ],
+      "seed_plan": "Introduce a duplicated code path that can be refactored back to one precedence decision.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-option-terminator-tests",
+      "task_class": "test_improvements",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/core/flags/parse.rs"
+      ],
+      "prompt": "Restore CLI regression assertions that filenames following -- are never treated as options.",
+      "acceptance_criteria": [
+        "A restored test passes a filename starting with a hyphen after -- and verifies it remains an operand.",
+        "A separate test checks ordinary flags before -- still apply."
+      ],
+      "seed_plan": "Delete the selected CLI argument-terminator assertions from upstream tests.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-preprocessor-argv-safety",
+      "task_class": "security_sensitive",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/core/flags/parse.rs"
+      ],
+      "prompt": "Repair a planted unsafe argument-handling regression for an explicitly configured preprocessor command.",
+      "acceptance_criteria": [
+        "Metacharacters inside an argument are passed literally, without executing an unexpected shell command.",
+        "A benign configured preprocessor still receives the intended filename and exits normally."
+      ],
+      "seed_plan": "Introduce unsafe string-based execution for one preprocessor argument path.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-json-printer-summary",
+      "task_class": "multi_file",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/printer/src/json.rs",
+        "crates/printer/src/stats.rs"
+      ],
+      "prompt": "Restore consistent match counts and event ordering across JSON output and summary statistics after a two-file regression.",
+      "acceptance_criteria": [
+        "A fixed corpus yields the same match count in JSON and summary modes.",
+        "Multiple files with and without matches preserve per-file event boundaries and nonnegative counters."
+      ],
+      "seed_plan": "Desynchronize JSON event totals and aggregate stats counters.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "ripgrep-walker-policy-isolation",
+      "task_class": "architecture",
+      "repo_id": "ripgrep",
+      "source_paths": [
+        "crates/ignore/src/walk.rs",
+        "crates/ignore/src/gitignore.rs"
+      ],
+      "prompt": "Repair separation between directory traversal and gitignore policy after a planted cross-module regression.",
+      "acceptance_criteria": [
+        "Walking with ignore enabled and disabled yields the expected independent file sets.",
+        "Symlinks and nested .gitignore policy do not cause traversal outside the selected root."
+      ],
+      "seed_plan": "Couple traversal control to an ignore-policy return path across the two modules.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-escaped-class-range",
+      "task_class": "bug_fix",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-syntax/src/ast/parse.rs"
+      ],
+      "prompt": "Repair a seeded character-class parser bug that misinterprets a literal hyphen or escaped bracket as a range delimiter.",
+      "acceptance_criteria": [
+        "Escaped hyphen and bracket syntax compiles to the intended character set.",
+        "Invalid descending ranges still produce a syntax error, not a silent match."
+      ],
+      "seed_plan": "Alter class-escape or range-boundary parsing for a targeted token.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-meta-search-consistency",
+      "task_class": "refactoring",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-automata/src/meta/regex.rs"
+      ],
+      "prompt": "Remove a planted duplicated search-result handling path while preserving find and captures behavior.",
+      "acceptance_criteria": [
+        "Find and captures agree on the first match span for the same pattern and haystack.",
+        "Zero-width matches and no-match results retain their original semantics."
+      ],
+      "seed_plan": "Introduce duplicated post-search span conversion used by find and captures.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-utf8-boundary-tests",
+      "task_class": "test_improvements",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-lite/tests/lib.rs"
+      ],
+      "prompt": "Restore regression coverage for UTF-8 boundaries and zero-width matching in the lightweight engine.",
+      "acceptance_criteria": [
+        "A restored test checks a zero-width match at a valid Unicode boundary.",
+        "A separate assertion verifies that a match cannot split a multi-byte UTF-8 codepoint in string mode."
+      ],
+      "seed_plan": "Delete selected boundary regression assertions from upstream integration tests.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-regex-size-limit",
+      "task_class": "security_sensitive",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-automata/src/meta/regex.rs"
+      ],
+      "prompt": "Restore enforcement of a configured automaton size limit for adversarially large regex patterns.",
+      "acceptance_criteria": [
+        "An oversized expression is rejected using the explicitly configured low limit.",
+        "A modest valid expression remains accepted under a reasonable limit."
+      ],
+      "seed_plan": "Bypass one configured size-limit check during automaton construction.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-unicode-flag-crossmodule",
+      "task_class": "multi_file",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-syntax/src/hir/translate.rs",
+        "regex-automata/src/meta/regex.rs"
+      ],
+      "prompt": "Repair a planted mismatch in Unicode-flag handling between syntax translation and regex execution.",
+      "acceptance_criteria": [
+        "Unicode-aware matching behaves as specified when the flag is enabled.",
+        "Disabling Unicode produces the documented ASCII-oriented behavior on the same input."
+      ],
+      "seed_plan": "Disagree on flag propagation between syntax translation and the meta engine.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "regex-engine-selection-contract",
+      "task_class": "architecture",
+      "repo_id": "regex",
+      "source_paths": [
+        "regex-automata/src/meta/strategy.rs",
+        "regex-automata/src/meta/regex.rs"
+      ],
+      "prompt": "Restore an engine-selection invariant so optimized and fallback regex strategies produce the same observable captures.",
+      "acceptance_criteria": [
+        "The same test corpus yields identical match spans across enabled search strategies.",
+        "A strategy fallback preserves match order and never silently drops a capture."
+      ],
+      "seed_plan": "Seed divergent result mapping in fallback strategy and meta dispatcher.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-option-terminator",
+      "task_class": "bug_fix",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/parser/parser.rs"
+      ],
+      "prompt": "Repair a planted end-of-options regression so a value after -- is never parsed as an option.",
+      "acceptance_criteria": [
+        "An argument named -value is accepted as a positional value after --.",
+        "Options before -- still parse normally and required positionals remain enforced."
+      ],
+      "seed_plan": "Invert the parser's end-of-options state transition.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-help-layout-refactor",
+      "task_class": "refactoring",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/output/help.rs"
+      ],
+      "prompt": "Remove duplicated help-row rendering logic without changing ordering, wrapping or styles.",
+      "acceptance_criteria": [
+        "Help text remains identical for commands with short/long flags and subcommands.",
+        "Colored and plain help formats preserve their expected line structure."
+      ],
+      "seed_plan": "Introduce duplicated rendering paths for formatted option entries.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-alias-validation-tests",
+      "task_class": "test_improvements",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/parser/validator.rs"
+      ],
+      "prompt": "Restore regression coverage for a required argument group and a subcommand alias.",
+      "acceptance_criteria": [
+        "A restored test fails parsing when all members of a required group are absent.",
+        "A separate assertion verifies alias resolution without accepting an unrelated alias."
+      ],
+      "seed_plan": "Remove selected validation assertions from upstream tests.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-argv-literal-safety",
+      "task_class": "security_sensitive",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/parser/parser.rs"
+      ],
+      "prompt": "Repair a planted parser regression that interprets shell-like bytes after -- as control syntax rather than literal user input.",
+      "acceptance_criteria": [
+        "Tokens containing shell metacharacters remain literal positional values with no process execution.",
+        "Unknown options before -- still return a normal parser error."
+      ],
+      "seed_plan": "Treat an after-terminator token as an option or expansion directive.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-usage-help-agreement",
+      "task_class": "multi_file",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/output/usage.rs",
+        "clap_builder/src/output/help.rs"
+      ],
+      "prompt": "Repair a planted inconsistency between required-argument usage output and full help text.",
+      "acceptance_criteria": [
+        "Required positional arguments appear consistently in both usage and full help.",
+        "Optional and mutually exclusive arguments remain correctly marked in both outputs."
+      ],
+      "seed_plan": "Change required-argument tracking inconsistently in usage and help generation.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "clap-builder-parser-separation",
+      "task_class": "architecture",
+      "repo_id": "clap",
+      "source_paths": [
+        "clap_builder/src/builder/command.rs",
+        "clap_builder/src/parser/parser.rs"
+      ],
+      "prompt": "Restore separation of immutable command configuration from per-invocation parser state.",
+      "acceptance_criteria": [
+        "Parsing the same command twice produces equivalent values without state leaking between runs.",
+        "Subcommand configuration remains stable after an earlier parse error."
+      ],
+      "seed_plan": "Move mutable parse-only state into shared command configuration.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-chunked-extensions",
+      "task_class": "bug_fix",
+      "repo_id": "hyper",
+      "source_paths": [
+        "src/proto/h1/decode.rs"
+      ],
+      "prompt": "Repair a planted chunked transfer decoder regression that mishandles valid chunk extensions.",
+      "acceptance_criteria": [
+        "A valid chunk extension is parsed without altering the decoded body bytes.",
+        "Malformed chunk sizes still produce an error and do not expose truncated body content."
+      ],
+      "seed_plan": "Corrupt one chunk-extension delimiter branch.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-header-parse-refactor",
+      "task_class": "refactoring",
+      "repo_id": "hyper",
+      "source_paths": [
+        "src/proto/h1/role.rs"
+      ],
+      "prompt": "Remove duplicated header validation logic while retaining HTTP/1 response and request parsing semantics.",
+      "acceptance_criteria": [
+        "Accepted requests and responses preserve existing parsed header values.",
+        "Malformed header syntax still fails with the same error class."
+      ],
+      "seed_plan": "Duplicate the request/response header validator logic and require shared invariant restoration.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-pipelining-regression-tests",
+      "task_class": "test_improvements",
+      "repo_id": "hyper",
+      "source_paths": [
+        "tests/h1_server/mod.rs"
+      ],
+      "prompt": "Restore regression tests for two pipelined HTTP/1 requests on a persistent connection.",
+      "acceptance_criteria": [
+        "A restored test verifies both requests receive responses in the original order.",
+        "An explicit connection-close case is tested separately so buffered bytes are not lost."
+      ],
+      "seed_plan": "Remove selected pipelining and close-boundary assertions from upstream tests.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-ambiguous-framing-rejection",
+      "task_class": "security_sensitive",
+      "repo_id": "hyper",
+      "source_paths": [
+        "src/proto/h1/role.rs"
+      ],
+      "prompt": "Repair a planted HTTP request-framing ambiguity that could enable request smuggling.",
+      "acceptance_criteria": [
+        "Conflicting Content-Length headers and conflicting transfer framing are rejected.",
+        "Unambiguous valid Content-Length and chunked messages remain accepted."
+      ],
+      "seed_plan": "Disable one conflict check in the HTTP/1 header framing parser.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-eof-coordination",
+      "task_class": "multi_file",
+      "repo_id": "hyper",
+      "source_paths": [
+        "src/client/conn/http1.rs",
+        "src/server/conn/http1.rs"
+      ],
+      "prompt": "Repair a planted early-EOF mismatch between HTTP/1 client and server connection handling.",
+      "acceptance_criteria": [
+        "Premature body EOF is reported as incomplete instead of successful.",
+        "A correctly terminated body is received intact on both client and server paths."
+      ],
+      "seed_plan": "Break end-of-body state propagation independently in client and server connections.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    },
+    {
+      "id": "hyper-conn-dispatch-boundary",
+      "task_class": "architecture",
+      "repo_id": "hyper",
+      "source_paths": [
+        "src/proto/h1/conn.rs",
+        "src/proto/h1/dispatch.rs"
+      ],
+      "prompt": "Restore an invariant between connection state and dispatch lifecycle after a planted architectural regression.",
+      "acceptance_criteria": [
+        "Graceful shutdown allows an in-flight response to finish without accepting a new request.",
+        "Dispatch cannot report successful completion while buffered response bytes remain unwritten."
+      ],
+      "seed_plan": "Misalign dispatcher completion and connection drain state transitions.",
+      "provenance": {
+        "type": "controlled_regression_proposal",
+        "upstream_issue": null,
+        "fix_commit": null
+      },
+      "seed_patch": null,
+      "withheld_acceptance_test": null,
+      "independent_reviews": [],
+      "dependency_scope_review": null,
+      "controls": {
+        "clean": null,
+        "seeded": null
+      }
+    }
+  ]
+}
