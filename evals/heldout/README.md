@@ -80,3 +80,31 @@ runs before deciding that routing is useful.
 
 The manifest is held separate from the smoke corpus and router. It is not
 an instruction to alter routing thresholds based on evaluation results.
+
+### Local patch-generation experiment
+
+`local-patch-runner.cjs` is an optional, isolated patch-generation experiment
+for an already installed Ollama model. It requires Node.js and a local Ollama
+server. It is **not** an autonomous coding agent: the model receives one source
+excerpt and returns text; it cannot read files, call tools, or run commands.
+The runner applies only a valid unified diff for the one source file named by
+the task's seed patch, then invokes the existing hidden acceptance grader. It
+never executes model-generated shell commands. The exact prompt, raw model
+response, patch, Ollama timing metrics and grade result are saved under
+`target/validation/local-patch-attempts/`; existing attempt directories are
+never overwritten.
+
+Build Preagent and prepare the seeded fixtures first, then run one independent
+attempt per task, for example:
+
+```powershell
+node evals/heldout/local-patch-runner.cjs --task itoa-decimal-pairs `
+  --model qwen2.5-coder:1.5b --preagent .\target\release\preagent.exe
+```
+
+The script calls only loopback Ollama (`127.0.0.1:11434`), verifies the model is
+already installed, refuses to interfere when another model is loaded, sets
+`keep_alive` to zero ([Ollama API](https://docs.ollama.com/api/generate)), and
+uses a fixed single attempt. Invalid or unsafe model patches are recorded
+without application or retry. This measures constrained patch generation, not
+autonomous agent tool use or the effect of Preagent routing on model selection.
