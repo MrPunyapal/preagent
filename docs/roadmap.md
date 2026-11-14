@@ -56,7 +56,8 @@ Acceptance: SLM provides measurable value on held-out tasks or stays optional.
 
 ## Milestone 4: Real model selection and more agents
 
-- Discover available models and effort levels from supported agent interfaces.
+- Read-only local Ollama model-name discovery is available through `preagent models`; discovery does not verify model capabilities, licenses or offline execution.
+- Discover supported model capabilities and effort levels from agent interfaces before making automatic selections.
 - Respect configured constraints, available models and permissions.
 - Add OpenCode and Claude Code adapters with supported protocols.
 - Preserve terminal behavior, sessions, signals, approval policy and errors.

@@ -275,6 +275,46 @@ fn absent_agents_and_invalid_slm_fail_usefully_without_network() {
 }
 
 #[test]
+fn cli_lists_models_via_loopback_without_loading_or_downloading_them() {
+    let listener = std::net::TcpListener::bind(("127.0.0.1", 0)).unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let server = std::thread::spawn(move || {
+        use std::io::Read;
+        let (mut stream, _) = listener.accept().unwrap();
+        stream
+            .set_read_timeout(Some(std::time::Duration::from_secs(3)))
+            .unwrap();
+        let mut request = [0; 8192];
+        let read = stream.read(&mut request).unwrap();
+        let request = std::str::from_utf8(&request[..read]).unwrap();
+        assert!(request.starts_with("GET /api/tags HTTP/1.1"));
+        let json = r#"{"models":[{"name":"qwen2.5-coder:1.5b","details":{"format":"gguf"}}]}"#;
+        let reply = format!(
+            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+            json.len(),
+            json
+        );
+        stream.write_all(reply.as_bytes()).unwrap();
+    });
+    let output = Command::new(env!("CARGO_BIN_EXE_preagent"))
+        .args(["models", "--json"])
+        .env("PREAGENT_OLLAMA_PORT", port.to_string())
+        .output()
+        .unwrap();
+    server.join().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let result = String::from_utf8(output.stdout).unwrap();
+    assert!(result.contains(r#""provider":"ollama""#));
+    assert!(result.contains(r#""models":["qwen2.5-coder:1.5b"]"#));
+    assert!(result.contains(r#""model_count":1"#));
+    assert!(result.contains(r#""offline_execution_verified":false"#));
+}
+
+#[test]
 fn heldout_pilot_is_separate_from_smoke_and_has_no_agent_outcome() {
     let listing = preagent(&["heldout", "list", "--json"]);
     assert!(listing.status.success());
