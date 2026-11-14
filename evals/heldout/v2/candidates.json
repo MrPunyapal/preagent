@@ -880,14 +880,14 @@
         "A restored test checks a zero-width match at a valid Unicode boundary.",
         "A separate assertion verifies that a match cannot split a multi-byte UTF-8 codepoint in string mode."
       ],
-      "seed_plan": "Delete selected boundary regression assertions from upstream integration tests.",
+      "seed_plan": "Stop loading the UTF-8 boundary corpus from the integration test suite; require restored zero-width coverage.",
       "provenance": {
         "type": "controlled_regression_proposal",
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/regex-utf8-boundary-tests.patch",
+      "withheld_acceptance_test": "acceptance/regex-utf8-boundary-tests.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {

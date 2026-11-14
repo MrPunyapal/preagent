@@ -1,0 +1,12 @@
+diff --git a/regex-lite/tests/lib.rs b/regex-lite/tests/lib.rs
+index 89635f2..f4ff815 100644
+--- a/regex-lite/tests/lib.rs
++++ b/regex-lite/tests/lib.rs
+@@ -36,7 +36,6 @@ fn suite() -> anyhow::Result<regex_test::RegexTests> {
+     load!("set");
+     load!("substring");
+     load!("unicode");
+-    load!("utf8");
+     load!("word-boundary");
+     load!("word-boundary-special");
+     load!("fowler/basic");
