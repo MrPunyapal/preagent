@@ -36,7 +36,7 @@ node evals/heldout/v2/check.cjs ready --json
 
 ## Candidate grading (experimental, NOT a benchmark result)
 
-Sixteen cases with independently recorded green/red fixture controls now have a
+Seventeen cases with independently recorded green/red fixture controls now have a
 local, non-agent grader. After preparing a **disposable** pinned upstream Git
 checkout and repairing the controlled regression, use:
 
