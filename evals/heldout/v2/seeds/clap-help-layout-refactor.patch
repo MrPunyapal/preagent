@@ -1,7 +1,7 @@
 diff --git a/clap_builder/src/output/help.rs b/clap_builder/src/output/help.rs
 --- a/clap_builder/src/output/help.rs
 +++ b/clap_builder/src/output/help.rs
-@@ -34,7 +34,8 @@
+@@ -34,6 +34,7 @@
      writer.trim_start_lines();
      // Remove any whitespace caused by book keeping
      writer.trim_end();
@@ -10,4 +10,3 @@ diff --git a/clap_builder/src/output/help.rs b/clap_builder/src/output/help.rs
 +    writer.push_str("\n");
 +    writer.push_str("\n");
  }
- 
