@@ -98,6 +98,8 @@ test('candidate validation requires the exact root and pinned Git commit', t => 
   assert.equal(result.status, 0, result.stderr);
   const sha = cp.execFileSync('git', ['rev-parse', 'HEAD'], {cwd: repo, encoding: 'utf8'}).trim();
   assert.equal(validateCandidate(repo, sha), fs.realpathSync(repo));
+  fs.mkdirSync(path.join(repo, 'nested'));
+  assert.throws(() => validateCandidate(path.join(repo, 'nested'), sha), /root of a local Git checkout/);
   assert.throws(() => validateCandidate(repo, '0'.repeat(40)), /pinned upstream revision/);
   assert.throws(() => validateCandidate(root, sha), /root of a local Git checkout/);
 });

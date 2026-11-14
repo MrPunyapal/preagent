@@ -69,10 +69,14 @@ function run(program, args, cwd, timeout = TIMEOUT_MS, extraEnv = {}) {
 function validateCandidate(candidate, revision) {
   const absolute = fs.realpathSync(candidate);
   if (!fs.statSync(absolute).isDirectory()) throw Error('candidate must be a directory');
-  const top = run('git', ['rev-parse', '--show-toplevel'], absolute, 15000);
+  // Use Git's repository-relative prefix rather than comparing absolute
+  // path strings. Git for Windows may return a different canonical spelling.
+  const prefix = run('git', ['rev-parse', '--show-prefix'], absolute, 15000);
+  const workingTree = run('git', ['rev-parse', '--is-inside-work-tree'], absolute, 15000);
   const head = run('git', ['rev-parse', 'HEAD'], absolute, 15000);
-  if (top.code !== 0 || head.code !== 0 || top.error || head.error ||
-      path.normalize(top.stdout.trim()).toLowerCase() !== absolute.toLowerCase()) {
+  if (prefix.code !== 0 || workingTree.code !== 0 || head.code !== 0 ||
+      prefix.error || workingTree.error || head.error ||
+      prefix.stdout.trim() !== '' || workingTree.stdout.trim() !== 'true') {
     throw Error('candidate must be the root of a local Git checkout');
   }
   if (head.stdout.trim() !== revision) {
