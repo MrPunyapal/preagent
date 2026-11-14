@@ -54,6 +54,12 @@ cached dependencies, crashes, timeouts and missing tests are not counted as
 failed behavioral acceptance tests. Pending cases without verified controls
 are rejected. This tool never launches a coding agent or performs inference.
 
+The separate `heldout-v2-grader-smoke.yml` GitHub Actions workflow validates
+both clean-passing and seeded-failing execution using the real pinned Serde
+checkout, while checking that grading leaves its candidate untouched.
+The smoke workflow fetches upstream source and dependencies; unlike the local
+grader, it is not an offline preparation command.
+
 **Security:** Copying is not process sandboxing. Cargo build scripts and
 tests execute candidate code with the current user's privileges; Cargo's
 `--offline` option restricts dependency fetching but does not prevent
