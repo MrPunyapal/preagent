@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "kind": "declared_dependency_license_inventory",
+  "status": "metadata_only_not_legal_approval",
+  "repository": "serde-rs/serde",
+  "revision": "aa7913ad0211fef960df68e7812a6211145a888c",
+  "os": "linux",
+  "platform": "x86_64-unknown-linux-gnu",
+  "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+  "cargo": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+  "upstream_lockfile_present": false,
+  "lockfile_sha256": "839a2f8b9d252c5dc6b93495aa8d54f9ba8cf5679a0f82dcdaaf12bbe6d7361f",
+  "scopes": [
+    {
+      "name": "serde_core",
+      "manifest_path": "serde_core/Cargo.toml",
+      "declared_license": "MIT OR Apache-2.0",
+      "dependency_count": 7,
+      "declared_dependencies": [
+        {
+          "name": "proc-macro2",
+          "version": "1.0.107",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "quote",
+          "version": "1.0.47",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "serde",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "serde_core",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "serde_derive",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "syn",
+          "version": "3.0.10",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "unicode-ident",
+          "version": "1.0.27",
+          "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        }
+      ],
+      "manual_review": []
+    },
+    {
+      "name": "serde_derive",
+      "manifest_path": "serde_derive/Cargo.toml",
+      "declared_license": "MIT OR Apache-2.0",
+      "dependency_count": 7,
+      "declared_dependencies": [
+        {
+          "name": "proc-macro2",
+          "version": "1.0.107",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "quote",
+          "version": "1.0.47",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "serde",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "serde_core",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "serde_derive",
+          "version": "1.0.229",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "local-workspace"
+        },
+        {
+          "name": "syn",
+          "version": "3.0.10",
+          "license": "MIT OR Apache-2.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        },
+        {
+          "name": "unicode-ident",
+          "version": "1.0.27",
+          "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+          "license_file": null,
+          "source": "registry+https://github.com/rust-lang/crates.io-index"
+        }
+      ],
+      "manual_review": []
+    }
+  ],
+  "warnings": [],
+  "error": null
+}
