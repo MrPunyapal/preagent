@@ -1,6 +1,6 @@
 # Held-out v2 fixture controls, 15 November 2026
 
-**Status: candidate, not frozen.** The expanded control run verified 16 of 36
+**Status: candidate, not frozen.** The expanded control run verified 17 of 36
 fixture pairs. It did not run a coding agent or score a model.
 
 ## Follow-up control run
@@ -49,9 +49,10 @@ artifact records were downloaded and checked against the repository. Text
 fixture hashes were compared after normalizing the Windows checkout's CRLF
 line endings to the canonical Git content.
 
-The candidate manifest now points to this run for all 16 verified controls.
-Twenty proposals still lack a complete verified seed/acceptance pair and
-clean/seeded evidence. All 36 proposals still need two genuine independent
-human complexity reviews, preserving disagreements. The 12 dependency scopes
-still need human license audits. Do not score models, tune routing, or freeze
-the candidate based on these controls.
+That earlier run covered 16 controls. The follow-up section above records the
+17th fixture and its corrected manifest evidence. Nineteen proposals still
+lack a complete verified seed/acceptance pair and clean/seeded evidence. All
+36 proposals still need two genuine independent human complexity reviews,
+preserving disagreements. The 12 dependency scopes still need human license
+audits. Do not score models, tune routing, or freeze the candidate based on
+these controls.

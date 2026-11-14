@@ -1,9 +1,13 @@
 name: Held-out v2 declared-license inventory
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '.github/workflows/heldout-v2-licenses.yml'
+      - 'evals/heldout/v2/candidates.json'
+      - 'evals/heldout/v2/locks/catalog.json'
+      - 'evals/heldout/v2/locks/*.lock'
       - 'evals/heldout/v2/license-inventory.cjs'
       - 'evals/heldout/v2/license-inventory.test.cjs'
 
