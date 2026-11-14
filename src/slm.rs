@@ -690,7 +690,13 @@ mod tests {
                 thread::sleep(Duration::from_millis(1500));
             });
             assert_eq!(
-                query(address, "Fix a bug", "example-local", Duration::from_millis(900)).unwrap(),
+                query(
+                    address,
+                    "Fix a bug",
+                    "example-local",
+                    Duration::from_millis(900)
+                )
+                .unwrap(),
                 Tier::Standard
             );
             child.join().unwrap();
