@@ -10,14 +10,32 @@ permissions:
   contents: read
 
 jobs:
+  select:
+    name: Select changed v2 controls
+    runs-on: ubuntu-latest
+    outputs:
+      tasks: ${{ steps.select.outputs.tasks }}
+      has_tasks: ${{ steps.select.outputs.has_tasks }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: select
+        name: Discover affected fixtures
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: node evals/heldout/v2/select-controls.cjs ci
+
   controlled:
     name: Verify seed (${{ matrix.task }})
+    needs: select
+    if: needs.select.outputs.has_tasks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        task: [serde-numeric-range, ripgrep-escaped-glob-literal, clap-option-terminator, regex-escaped-class-range, tokio-timeout-deadline, hyper-chunked-extensions]
+        task: ${{ fromJSON(needs.select.outputs.tasks) }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
