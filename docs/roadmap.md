@@ -34,12 +34,15 @@ Acceptance: an independent contributor can reproduce the comparison.
 
 - A separate 36-case candidate registry exists at `evals/heldout/v2/`.
 - All six source revisions and 12 package-level licenses have been checked;
-  historical issue selection, dependency-scope audits and executable controls
-  are still pending.
+  6/36 fixtures have verified green/red controls, while 30 remain unverified.
+  Historical issue selection and dependency-scope signoffs are still pending.
+  Declared-license inventories have been collected for all 12 scopes.
 - Freeze requires 36 verified seed/acceptance pairs, independent human
   reviewer labels (disagreements preserved), and signed content hashes.
 - No model or routing outcome may be reported against the candidate set.
-- See `docs/heldout-v2-preparation-2026-11-13.md` for specific blockers.
+- See `docs/heldout-v2-controls-2026-11-14.md` for verified fixture
+  evidence, `docs/heldout-v2-license-inventory-2026-11-14.md` for metadata
+  inventory, and issue #2 for authentic independent reviews.
 
 ## Milestone 3: Optional local SLM
 

@@ -56,9 +56,21 @@ node evals/heldout/v2/check.cjs ready --json
 6. Obtain human signoff and move to a separate `frozen` manifest revision.
    A freeze must fail if any gate is unmet; do not relabel to increase scores.
 
-**No v2 agent runs, SLM classification, seed patches or hidden tests exist yet.**
-The purpose of this registry is to make requirements explicit without
-fabricating successful controls or independent reviews.
+**Current evidence (November 14, 2026):** six v2 tasks, one per upstream
+repository, now have seed patches, executable withheld acceptance tests and
+verified green-clean/red-seeded checks in GitHub Actions. **Thirty other
+candidate tasks still lack those fixtures and controls.** No v2 model runs,
+SLM classification, task-repair outcomes or independent complexity reviews
+exist. See [verified controls](../../../docs/heldout-v2-controls-2026-11-14.md)
+and the [pinned license-inventory findings](../../../docs/heldout-v2-license-inventory-2026-11-14.md).
+
+For genuine human reviews, use the [blind review packet](review/packet.md),
+[submission checker](review/check-submission.cjs), and
+[review coordination issue #2](https://github.com/MrPunyapal/preagent/issues/2).
+No one has been assigned a fabricated label or approval.
+
+This candidate registry must remain unfrozen until the remaining independent
+reviews, license audits, verified fixture controls and content lock are done.
 
 All existing `evals/heldout/v1.tsv`, its fixtures/results, and
 `evals/baseline.tsv` remain unchanged. No production Rust router was edited.
