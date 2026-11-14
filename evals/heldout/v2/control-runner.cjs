@@ -6,11 +6,14 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
 const base = __dirname;
-const enabled = new Set(['serde-numeric-range','ripgrep-escaped-glob-literal','clap-option-terminator','regex-escaped-class-range','tokio-timeout-deadline','hyper-chunked-extensions']);
 const taskId = process.argv[2];
-if (!enabled.has(taskId)) throw Error('task not enabled for controls');
+if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(taskId||''))throw Error('invalid task ID');
 const manifest = JSON.parse(fs.readFileSync(path.join(base,'candidates.json'),'utf8'));
 const task = manifest.cases.find(c=>c.id===taskId);
+if (!task || !task.seed_patch || !task.withheld_acceptance_test)
+  throw Error('task lacks checked-in seed and acceptance fixtures');
+if (task.acceptance_injection && task.acceptance_injection!=='source_test_module')
+  throw Error('unrecognized acceptance injection');
 const repo = manifest.repositories.find(r=>r.id===task.repo_id);
 const pkg = repo.packages.find(p=>p.name===task.target_packages[0]);
 if (!new Set(['serde-rs/serde','BurntSushi/ripgrep','clap-rs/clap','rust-lang/regex','tokio-rs/tokio','hyperium/hyper']).has(repo.github) ||
@@ -81,7 +84,7 @@ try {
  must('cargo',['fetch','--locked','--manifest-path',manifestFile],checkout);
  if(sha(fs.readFileSync(lockFile))!==snapshot.lock_sha256)
    throw Error('Cargo modified pinned dependency resolution');
- const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:
+ const extraFeatures=task.repo_id==='tokio'?['--features','rt,time,sync']:
    task.repo_id==='hyper'?['--features','full']:[];
  const args=sourceModule?
    ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
@@ -97,8 +100,11 @@ try {
  }
  must('git',['apply','--check',abs(task.seed_patch)],checkout);
  must('git',['apply',abs(task.seed_patch)],checkout);
- const changed=must('git',['diff','--name-only'],checkout).stdout.trim().split(/\r?\n/);
- if(changed.length!==1||changed[0].replace(/\\/g,'/')!==task.source_paths[0])throw Error('unrelated source changed');
+ const changed=must('git',['diff','--name-only'],checkout).stdout.trim().split(/\r?\n/)
+   .map(p=>p.replace(/\\/g,'/')).sort();
+ const expectedPaths=[...task.source_paths].sort();
+ if(changed.length!==expectedPaths.length ||
+    changed.some((p,i)=>p!==expectedPaths[i]))throw Error('unrelated or missing source changes');
  const red=exec('cargo',args,checkout,900000,{CARGO_NET_OFFLINE:'true'});
  report.seeded={status:red.code!==0&&/test result: FAILED\.\s+\d+ passed;\s+[1-9]\d* failed/.test(red.stdout)?
    'acceptance_failed':'infrastructure_or_build_failure',exit_code:red.code,
