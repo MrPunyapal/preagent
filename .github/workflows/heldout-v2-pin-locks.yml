@@ -1,0 +1,52 @@
+name: Pin v2 GitHub Actions dependency snapshots
+on:
+  push:
+    paths:
+      - '.github/workflows/heldout-v2-pin-locks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  snapshot:
+    name: Reproduce and commit pinned Cargo locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: v2-locks-main
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source run and artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          origin_sha="$(gh api repos/MrPunyapal/preagent/actions/runs/43581601670 --jq '.head_sha')"
+          test "$origin_sha" = "a7444cece70cc2fb05902b9ae9ad6ec6252b6b61"
+          gh run download 43581601670 --repo MrPunyapal/preagent --dir "$RUNNER_TEMP/v2-lock-artifacts"
+      - name: Verify immutable hashes and stage snapshot files
+        run: |
+          set -euo pipefail
+          node evals/heldout/v2/locks/lock-snapshots.cjs materialize "$RUNNER_TEMP/v2-lock-artifacts"
+          node evals/heldout/v2/locks/lock-snapshots.cjs check
+          node evals/heldout/v2/check.cjs draft
+          node --test evals/heldout/v2/check.test.cjs
+      - name: Commit directly to main only if it has not advanced
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || {
+            echo "origin/main advanced; preserve work and stop without force-push" >&2
+            exit 1
+          }
+          git add -- evals/heldout/v2/locks/*.lock evals/heldout/v2/licenses/*.json
+          if git diff --cached --quiet; then
+            echo "Snapshots already present; no commit"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "test: pin six verified Cargo resolutions for held-out v2"
+          git push origin HEAD:main

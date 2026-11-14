@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "description": "Pinned GitHub Actions Cargo lockfile and declared-license inventory snapshots; NOT independent license approvals.",
+  "source": {
+    "workflow_run_id": 43581601670,
+    "head_sha": "a7444cece70cc2fb05902b9ae9ad6ec6252b6b61",
+    "url": "https://github.com/MrPunyapal/preagent/actions/runs/43581601670"
+  },
+  "repositories": [
+    {
+      "id": "tokio",
+      "revision": "ab0814fc8c62b3d8be40aad068e2fed6562cfeb0",
+      "artifact": "v2-declared-license-tokio",
+      "lockfile": "locks/tokio.lock",
+      "lock_sha256": "ab8ccc9fb105df9441d0dc07045c343927057108eda274d333d5eb57585d3a74",
+      "inventory": "licenses/tokio.json",
+      "inventory_sha256": "10f00a91db247891d79a1738c14641b242a91becd135be51a29d629239f77812"
+    },
+    {
+      "id": "serde",
+      "revision": "aa7913ad0211fef960df68e7812a6211145a888c",
+      "artifact": "v2-declared-license-serde",
+      "lockfile": "locks/serde.lock",
+      "lock_sha256": "839a2f8b9d252c5dc6b93495aa8d54f9ba8cf5679a0f82dcdaaf12bbe6d7361f",
+      "inventory": "licenses/serde.json",
+      "inventory_sha256": "42461b7a5a0528a99b80ba424d52bdf07f7122768cf1529f76187a59c49264e7"
+    },
+    {
+      "id": "ripgrep",
+      "revision": "178cc027e283fd965cb72d0a7395b219eada170c",
+      "artifact": "v2-declared-license-ripgrep",
+      "lockfile": "locks/ripgrep.lock",
+      "lock_sha256": "bf918d72d563dd706beacb4e258106102c14fbc2f85272f1f749a5044e3c3f43",
+      "inventory": "licenses/ripgrep.json",
+      "inventory_sha256": "3a74643003fbe883a95724b04eec89eb017d752f2e97e9546125da1f1c2268ce"
+    },
+    {
+      "id": "regex",
+      "revision": "3d79fe92666a9f191d7677ebc123ac165eac200c",
+      "artifact": "v2-declared-license-regex",
+      "lockfile": "locks/regex.lock",
+      "lock_sha256": "e172d6836b0e58aa59e040b62264275d85e5feaaa3323354b2258837825bb3d4",
+      "inventory": "licenses/regex.json",
+      "inventory_sha256": "b3467f2ea992e7be9aeab29b050e958371eafdc1bc92cd799d896922355603d5"
+    },
+    {
+      "id": "clap",
+      "revision": "ec93e71255c0b833a34f50662a3fdb22f53f6ded",
+      "artifact": "v2-declared-license-clap",
+      "lockfile": "locks/clap.lock",
+      "lock_sha256": "61335371da607f7422176f61513d8ae9892762cd3570a56f88b90e3038539f8a",
+      "inventory": "licenses/clap.json",
+      "inventory_sha256": "125ef3d2e45278ee252cb6099637781243a919187b8da39dc010cfe288c7c961"
+    },
+    {
+      "id": "hyper",
+      "revision": "378f8479b8b703d098b46de1cec9ea648f12ea69",
+      "artifact": "v2-declared-license-hyper",
+      "lockfile": "locks/hyper.lock",
+      "lock_sha256": "fd4b5461c693ad13aa5bcc77d9e98a00b706bd3ab3ce2485b4dbed6531a27f44",
+      "inventory": "licenses/hyper.json",
+      "inventory_sha256": "c9e77bf6580836b7f9cee1bb196cea1cfd98128064192822e49afc9a9a79059e"
+    }
+  ]
+}
