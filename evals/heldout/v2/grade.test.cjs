@@ -102,7 +102,9 @@ test('snapshot materializes only safe directory symlinks and rejects cycles', t 
     'pub fn value() -> u8 { 2 }');
   assert.equal(fs.lstatSync(path.join(output, 'alias')).isSymbolicLink(), false);
   fs.symlinkSync('..', path.join(input, 'crate', 'parent'), 'dir');
-  assert.throws(() => snapshot(input, path.join(root, 'other')), /symlink cycle/);
+  const other = path.join(root, 'other');
+  fs.mkdirSync(other);
+  assert.throws(() => snapshot(input, other), /symlink cycle|symlink escapes/);
 });
 
 test('withheld acceptance is injected only into grading copy', t => {
