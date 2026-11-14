@@ -68,7 +68,10 @@ try {
    'acceptance_passed':'infrastructure_or_build_failure',exit_code:clean.code,
    stdout_tail:clean.stdout.slice(-2000),stderr_tail:clean.stderr.slice(-1700)};
  save();
- if(report.clean.status!=='acceptance_passed')throw Error('clean control did not pass');
+ if(report.clean.status!=='acceptance_passed'){
+  process.stderr.write('CLEAN CONTROL DETAILS '+JSON.stringify(report.clean)+'\n');
+  throw Error('clean control did not pass');
+ }
  must('git',['apply','--check',abs(task.seed_patch)],checkout);
  must('git',['apply',abs(task.seed_patch)],checkout);
  const changed=must('git',['diff','--name-only'],checkout).stdout.trim().split(/\r?\n/);
@@ -78,7 +81,10 @@ try {
    'acceptance_failed':'infrastructure_or_build_failure',exit_code:red.code,
    stdout_tail:red.stdout.slice(-2200),stderr_tail:red.stderr.slice(-1700)};
  save();
- if(report.seeded.status!=='acceptance_failed')throw Error('seeded control did not fail tests');
+ if(report.seeded.status!=='acceptance_failed'){
+  process.stderr.write('SEEDED CONTROL DETAILS '+JSON.stringify(report.seeded)+'\n');
+  throw Error('seeded control did not fail tests');
+ }
  process.stdout.write('VERIFIED '+taskId+': clean PASS / seeded FAIL\n');
 } catch(error) {
  report.error=error.message;
