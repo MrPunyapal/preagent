@@ -3,6 +3,19 @@
 **Status: candidate, not frozen.** The expanded control run verified 16 of 36
 fixture pairs. It did not run a coding agent or score a model.
 
+## Follow-up control run
+
+Commit `398b60e07354d6098beab97d525108c92f14bd49` added the
+`regex-utf8-boundary-tests` fixture and taught the isolated grader to inject
+acceptance tests into a package's existing named integration target. The
+[v2 control run](https://github.com/MrPunyapal/preagent/actions/runs/43632842058)
+completed successfully: all 17 clean controls passed, and all 17 seeded
+controls failed as expected. The regex case's
+[job](https://github.com/MrPunyapal/preagent/actions/runs/43632842058/job/132563064922)
+and [raw artifact](https://github.com/MrPunyapal/preagent/actions/runs/43632842058/artifacts/14129185110)
+record the pinned revision and fixture hashes. This brings the verified count
+to 17 of 36; 19 candidate proposals still lack complete controlled fixtures.
+
 Commit `cb08042fc7e43f5b5510bcfcfab0b84e3aa44df4` added a
 `workflow_dispatch` trigger. Its push-triggered run selected all 16 candidates
 with both seed and acceptance files; future manual dispatches can rerun all

@@ -34,7 +34,7 @@ Acceptance: an independent contributor can reproduce the comparison.
 
 - A separate 36-case candidate registry exists at `evals/heldout/v2/`.
 - All six source revisions and declared-license inventories for 12 package
-  scopes are pinned; 16/36 fixtures have verified green/red controls, while 20
+  scopes are pinned; 17/36 fixtures have verified green/red controls, while 19
   still lack a complete controlled fixture. Independent task reviews and
   transitive dependency-license audits remain pending.
 - Freeze requires 36 verified seed/acceptance pairs, independent human

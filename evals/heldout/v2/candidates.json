@@ -274,8 +274,18 @@
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
-        "clean": null,
-        "seeded": null
+        "clean": {
+          "status": "acceptance_passed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43632842058/job/132563064922",
+          "run_sha": "398b60e07354d6098beab97d525108c92f14bd49",
+          "artifact_id": 14129185110
+        },
+        "seeded": {
+          "status": "acceptance_failed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43632842058/job/132563064922",
+          "run_sha": "398b60e07354d6098beab97d525108c92f14bd49",
+          "artifact_id": 14129185110
+        }
       },
       "target_packages": [
         "tokio"
