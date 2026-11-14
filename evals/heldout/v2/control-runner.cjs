@@ -66,14 +66,26 @@ try {
  }
  const lockFile=path.join(checkout,'Cargo.lock');
  report.lockfile_in_upstream=fs.existsSync(lockFile);
- must('cargo',['fetch','--manifest-path',manifestFile],checkout);
- if(!fs.existsSync(lockFile))throw Error('Cargo.lock not resolved');
- report.lockfile_sha256=sha(fs.readFileSync(lockFile));
+ report.upstream_lockfile_sha256=report.lockfile_in_upstream?
+    sha(fs.readFileSync(lockFile)):null;
+ // Cargo's full dependency resolution must match the exact archived inventory.
+ const lockCatalog=JSON.parse(fs.readFileSync(path.join(base,'locks','catalog.json'),'utf8'));
+ const snapshot=lockCatalog.repositories.find(x=>x.id===task.repo_id);
+ if(!snapshot || snapshot.revision!==repo.revision)throw Error('no pinned dependency resolution');
+ const pinned=path.join(base,...snapshot.lockfile.split('/'));
+ const pinnedBytes=fs.readFileSync(pinned);
+ if(sha(pinnedBytes)!==snapshot.lock_sha256)throw Error('tampered pinned Cargo.lock');
+ fs.writeFileSync(lockFile,pinnedBytes);
+ report.lockfile_sha256=sha(pinnedBytes);
+ report.lockfile_pinned=true;
+ must('cargo',['fetch','--locked','--manifest-path',manifestFile],checkout);
+ if(sha(fs.readFileSync(lockFile))!==snapshot.lock_sha256)
+   throw Error('Cargo modified pinned dependency resolution');
  const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:
    task.repo_id==='hyper'?['--features','full']:[];
  const args=sourceModule?
-   ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
-   ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
+   ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
+   ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
  const clean=exec('cargo',args,checkout,900000,{CARGO_NET_OFFLINE:'true'});
  report.clean={status:clean.code===0&&/test result: ok\. [1-9]\d* passed/.test(clean.stdout)?
    'acceptance_passed':'infrastructure_or_build_failure',exit_code:clean.code,

@@ -32,6 +32,8 @@ jobs:
         run: cargo run --locked -- heldout list --json
       - name: Evaluate frozen held-out routing (no SLM)
         run: cargo run --locked -- heldout route --json
+      - name: Verify v2 pinned dependency snapshots
+        run: node evals/heldout/v2/locks/lock-snapshots.cjs check
       - name: Validate held-out v2 candidates (not frozen)
         run: node evals/heldout/v2/check.cjs draft
       - name: Test held-out v2 freeze gates
