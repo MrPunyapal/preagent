@@ -26,14 +26,14 @@ fn valid_model_name(model: &str) -> bool {
 }
 
 fn local_port() -> Result<u16, String> {
-    match std::env::var("PREAGENT_OLLAMA_PORT") {
+    Ok(match std::env::var("PREAGENT_OLLAMA_PORT") {
         Ok(value) => value
             .parse::<u16>()
             .ok()
             .filter(|value| *value != 0)
             .ok_or("PREAGENT_OLLAMA_PORT must be a nonzero port")?,
         Err(_) => 11434,
-    }
+    })
 }
 
 pub fn classify(prompt: &str, model: &str) -> Result<Tier, String> {
