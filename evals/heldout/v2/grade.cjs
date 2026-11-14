@@ -85,27 +85,47 @@ function validateCandidate(candidate, revision) {
   return absolute;
 }
 
-function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0) {
+function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0, root = source) {
   if (depth > 64) throw Error('candidate directory depth limit exceeded');
+  const excluded = new Set(['.git', 'target', 'node_modules', '.venv', '__pycache__']);
   for (const entry of fs.readdirSync(source, {withFileTypes: true})) {
-    if (['.git', 'target', 'node_modules', '.venv', '__pycache__'].includes(entry.name)) continue;
-    // Replaces the root lock with a reviewed, pinned dependency resolution.
+    if (excluded.has(entry.name)) continue;
+    // Replaces the root lock with the pinned dependency resolution.
     if (depth === 0 && entry.name === 'Cargo.lock') continue;
     const from = path.join(source, entry.name);
     const to = path.join(destination, entry.name);
     const info = fs.lstatSync(from);
-    if (info.isSymbolicLink()) throw Error('candidate contains symlink: ' + from);
-    if (info.isDirectory()) {
+    let copyFrom = from;
+    let fileInfo = info;
+    if (info.isSymbolicLink()) {
+      // Serde and other upstreams use legitimate in-repository license links.
+      // Materialize only regular files whose entire resolution stays inside
+      // the candidate. Do not copy links to .git, build output or external data.
+      const target = fs.readlinkSync(from);
+      if (path.isAbsolute(target)) throw Error('absolute candidate symlink: ' + from);
+      const resolved = fs.realpathSync(from);
+      const relative = path.relative(fs.realpathSync(root), resolved);
+      const pieces = relative.split(path.sep);
+      if (!relative || relative === '..' || relative.startsWith('..' + path.sep) ||
+          path.isAbsolute(relative) || pieces.some(part => excluded.has(part)) ||
+          relative === 'Cargo.lock') {
+        throw Error('candidate symlink escapes allowed snapshot files: ' + from);
+      }
+      fileInfo = fs.statSync(resolved);
+      if (!fileInfo.isFile()) throw Error('candidate directory symlink is not supported: ' + from);
+      copyFrom = resolved;
+    }
+    if (fileInfo.isDirectory()) {
       fs.mkdirSync(to);
-      snapshot(from, to, budget, depth + 1);
-    } else if (info.isFile()) {
+      snapshot(from, to, budget, depth + 1, root);
+    } else if (fileInfo.isFile()) {
       budget.files++;
-      budget.bytes += info.size;
+      budget.bytes += fileInfo.size;
       if (budget.files > MAX_FILES || budget.bytes > MAX_BYTES) {
         throw Error('candidate snapshot exceeds file count or byte limit');
       }
-      fs.copyFileSync(from, to);
-      fs.chmodSync(to, info.mode & 0o777);
+      fs.copyFileSync(copyFrom, to);
+      fs.chmodSync(to, fileInfo.mode & 0o777);
     } else throw Error('candidate contains unsupported file type: ' + from);
   }
   return budget;

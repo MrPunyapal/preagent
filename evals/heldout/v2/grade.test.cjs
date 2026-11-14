@@ -60,6 +60,29 @@ test('snapshot rejects symlinks instead of following files outside candidate', t
   assert.equal(fs.existsSync(path.join(output, 'linked')), false);
 });
 
+test('snapshot materializes only in-tree regular file symlinks', t => {
+  const root = sandbox(t);
+  const input = path.join(root, 'in');
+  const output = path.join(root, 'out');
+  fs.mkdirSync(path.join(input, 'src'), {recursive: true});
+  fs.mkdirSync(path.join(input, '.git'));
+  fs.mkdirSync(output);
+  fs.writeFileSync(path.join(input, 'src', 'LICENSE'), 'permissive license text');
+  fs.writeFileSync(path.join(input, '.git', 'config'), 'private Git settings');
+  try {
+    fs.symlinkSync(path.join('src', 'LICENSE'), path.join(input, 'LICENSE'));
+  } catch (e) {
+    if (e.code === 'EPERM' || e.code === 'EACCES') return t.skip('symlink privilege unavailable');
+    throw e;
+  }
+  snapshot(input, output);
+  assert.equal(fs.readFileSync(path.join(output, 'LICENSE'), 'utf8'), 'permissive license text');
+  assert.equal(fs.lstatSync(path.join(output, 'LICENSE')).isSymbolicLink(), false);
+  fs.symlinkSync(path.join('.git', 'config'), path.join(input, 'settings'));
+  assert.throws(() => snapshot(input, output), /symlink/);
+  assert.equal(fs.existsSync(path.join(output, 'settings')), false);
+});
+
 test('withheld acceptance is injected only into grading copy', t => {
   const root = sandbox(t);
   const fixture = path.join(root, 'acceptance.rs');
