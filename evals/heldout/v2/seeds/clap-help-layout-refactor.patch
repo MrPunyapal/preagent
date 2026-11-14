@@ -1,0 +1,13 @@
+diff --git a/clap_builder/src/output/help.rs b/clap_builder/src/output/help.rs
+--- a/clap_builder/src/output/help.rs
++++ b/clap_builder/src/output/help.rs
+@@ -34,7 +34,8 @@
+     writer.trim_start_lines();
+     // Remove any whitespace caused by book keeping
+     writer.trim_end();
+     // Ensure there is still a trailing newline
+-    writer.push_str("\n");
++    writer.push_str("\n");
++    writer.push_str("\n");
+ }
+ 

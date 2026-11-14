@@ -1,0 +1,15 @@
+diff --git a/regex-automata/src/meta/regex.rs b/regex-automata/src/meta/regex.rs
+--- a/regex-automata/src/meta/regex.rs
++++ b/regex-automata/src/meta/regex.rs
+@@ -554,9 +554,10 @@
+     /// # Ok::<(), Box<dyn std::error::Error>>(())
+     /// ```
+     #[inline]
+     pub fn find<'h, I: Into<Input<'h>>>(&self, input: I) -> Option<Match> {
+-        self.search(&input.into())
++        let haystack = input.into();
++        self.search(&haystack).filter(|m| m.start() != m.end())
+     }
+ 
+     /// Executes a leftmost forward search and writes the spans of capturing
+     /// groups that participated in a match into the provided [`Captures`]

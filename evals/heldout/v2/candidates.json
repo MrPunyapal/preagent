@@ -806,8 +806,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/regex-meta-search-consistency.patch",
+      "withheld_acceptance_test": "acceptance/regex-meta-search-consistency.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -999,8 +999,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/clap-help-layout-refactor.patch",
+      "withheld_acceptance_test": "acceptance/clap-help-layout-refactor.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -1192,8 +1192,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/hyper-header-parse-refactor.patch",
+      "withheld_acceptance_test": "acceptance/hyper-header-parse-refactor.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -1202,7 +1202,8 @@
       },
       "target_packages": [
         "hyper"
-      ]
+      ],
+      "acceptance_injection": "source_test_module"
     },
     {
       "id": "hyper-pipelining-regression-tests",

@@ -1,0 +1,14 @@
+diff --git a/src/proto/h1/role.rs b/src/proto/h1/role.rs
+--- a/src/proto/h1/role.rs
++++ b/src/proto/h1/role.rs
+@@ -85,9 +85,9 @@
+ 
+     let _entered = trace_span!("parse_headers");
+ 
+     if let Some(prev_len) = prev_len {
+-        if !is_complete_fast(bytes, prev_len) {
++        if is_complete_fast(bytes, prev_len) {
+             return Ok(None);
+         }
+     }
+ 
