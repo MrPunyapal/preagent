@@ -2,7 +2,9 @@ use ignore::gitignore::GitignoreBuilder;
 
 fn matcher(root: &str, rules: &str) -> ignore::gitignore::Gitignore {
     let mut builder = GitignoreBuilder::new(root);
-    builder.add_str(None, rules).unwrap();
+    for line in rules.lines() {
+        builder.add_line(None, line).unwrap();
+    }
     builder.build().unwrap()
 }
 

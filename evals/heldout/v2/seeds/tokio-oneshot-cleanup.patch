@@ -1,17 +1,16 @@
 diff --git a/tokio/src/sync/oneshot.rs b/tokio/src/sync/oneshot.rs
 --- a/tokio/src/sync/oneshot.rs
 +++ b/tokio/src/sync/oneshot.rs
-@@ -739,9 +739,13 @@
+@@ -739,9 +739,12 @@
          );
          #[cfg(not(all(tokio_unstable, feature = "tracing")))]
          let closed = poll_fn(|cx| self.poll_closed(cx));
  
 -        closed.await;
-+        if self.is_closed() {
++        let closed_check = async {
 +            closed.await;
-+        } else {
-+            drop(closed);
-+        }
++        };
++        drop(closed_check);
      }
  
      /// Returns `true` if the associated [`Receiver`] handle has been dropped.
