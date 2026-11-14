@@ -36,6 +36,8 @@ jobs:
         run: node evals/heldout/v2/check.cjs draft
       - name: Test held-out v2 freeze gates
         run: node --test evals/heldout/v2/check.test.cjs
+      - name: Check held-out v2 license-inventory test helpers
+        run: node --test evals/heldout/v2/license-inventory.test.cjs
       - name: Build
         run: cargo build --release --locked
       - name: Upload development binary

@@ -1,0 +1,33 @@
+name: Held-out v2 declared-license inventory
+
+on:
+  push:
+    paths:
+      - '.github/workflows/heldout-v2-licenses.yml'
+      - 'evals/heldout/v2/license-inventory.cjs'
+      - 'evals/heldout/v2/license-inventory.test.cjs'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    name: Declared-license inventory (${{ matrix.repository }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        repository: [tokio, serde, ripgrep, regex, clap, hyper]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Collect pinned declared-license graph
+        run: node evals/heldout/v2/license-inventory.cjs ${{ matrix.repository }}
+      - name: Preserve inventory and lockfile snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-declared-license-${{ matrix.repository }}
+          path: target/validation/v2-licenses/${{ matrix.repository }}*
+          if-no-files-found: warn
