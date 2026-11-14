@@ -83,6 +83,28 @@ test('snapshot materializes only in-tree regular file symlinks', t => {
   assert.equal(fs.existsSync(path.join(output, 'settings')), false);
 });
 
+test('snapshot materializes only safe directory symlinks and rejects cycles', t => {
+  const root = sandbox(t);
+  const input = path.join(root, 'in');
+  const output = path.join(root, 'out');
+  fs.mkdirSync(input);
+  fs.mkdirSync(output);
+  fs.mkdirSync(path.join(input, 'crate'));
+  fs.writeFileSync(path.join(input, 'crate', 'lib.rs'), 'pub fn value() -> u8 { 2 }');
+  try {
+    fs.symlinkSync('crate', path.join(input, 'alias'), 'dir');
+  } catch (e) {
+    if (e.code === 'EPERM' || e.code === 'EACCES') return t.skip('symlink privilege unavailable');
+    throw e;
+  }
+  snapshot(input, output);
+  assert.equal(fs.readFileSync(path.join(output, 'alias', 'lib.rs'), 'utf8'),
+    'pub fn value() -> u8 { 2 }');
+  assert.equal(fs.lstatSync(path.join(output, 'alias')).isSymbolicLink(), false);
+  fs.symlinkSync('..', path.join(input, 'crate', 'parent'), 'dir');
+  assert.throws(() => snapshot(input, path.join(root, 'other')), /symlink cycle/);
+});
+
 test('withheld acceptance is injected only into grading copy', t => {
   const root = sandbox(t);
   const fixture = path.join(root, 'acceptance.rs');

@@ -85,8 +85,12 @@ function validateCandidate(candidate, revision) {
   return absolute;
 }
 
-function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0, root = source) {
+function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0, root = source, active = new Set()) {
   if (depth > 64) throw Error('candidate directory depth limit exceeded');
+  const canonical = fs.realpathSync(source);
+  if (active.has(canonical)) throw Error('candidate directory symlink cycle: ' + source);
+  active.add(canonical);
+  try {
   const excluded = new Set(['.git', 'target', 'node_modules', '.venv', '__pycache__']);
   for (const entry of fs.readdirSync(source, {withFileTypes: true})) {
     if (excluded.has(entry.name)) continue;
@@ -99,7 +103,7 @@ function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0,
     let fileInfo = info;
     if (info.isSymbolicLink()) {
       // Serde and other upstreams use legitimate in-repository license links.
-      // Materialize only regular files whose entire resolution stays inside
+      // Materialize only regular files or directories whose resolution stays inside
       // the candidate. Do not copy links to .git, build output or external data.
       const target = fs.readlinkSync(from);
       if (path.isAbsolute(target)) throw Error('absolute candidate symlink: ' + from);
@@ -112,12 +116,12 @@ function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0,
         throw Error('candidate symlink escapes allowed snapshot files: ' + from);
       }
       fileInfo = fs.statSync(resolved);
-      if (!fileInfo.isFile()) throw Error('candidate directory symlink is not supported: ' + from);
+      if (!fileInfo.isFile() && !fileInfo.isDirectory()) throw Error('unsupported candidate symlink: ' + from);
       copyFrom = resolved;
     }
     if (fileInfo.isDirectory()) {
       fs.mkdirSync(to);
-      snapshot(from, to, budget, depth + 1, root);
+      snapshot(copyFrom, to, budget, depth + 1, root, active);
     } else if (fileInfo.isFile()) {
       budget.files++;
       budget.bytes += fileInfo.size;
@@ -129,6 +133,9 @@ function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0,
     } else throw Error('candidate contains unsupported file type: ' + from);
   }
   return budget;
+  } finally {
+    active.delete(canonical);
+  }
 }
 
 function injectAcceptance(checkout, config) {
