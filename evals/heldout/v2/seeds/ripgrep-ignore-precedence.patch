@@ -1,0 +1,18 @@
+diff --git a/crates/ignore/src/gitignore.rs b/crates/ignore/src/gitignore.rs
+--- a/crates/ignore/src/gitignore.rs
++++ b/crates/ignore/src/gitignore.rs
+@@ -271,9 +271,13 @@
+         for &i in matches.iter().rev() {
+             let glob = &self.globs[i];
+             if !glob.is_only_dir() || is_dir {
+                 return if glob.is_whitelist() {
+-                    Match::Whitelist(glob)
++                    if glob.is_whitelist() {
++                        Match::Ignore(glob)
++                    } else {
++                        Match::Whitelist(glob)
++                    }
+                 } else {
+                     Match::Ignore(glob)
+                 };
+             }

@@ -1,0 +1,14 @@
+diff --git a/regex-automata/src/meta/regex.rs b/regex-automata/src/meta/regex.rs
+--- a/regex-automata/src/meta/regex.rs
++++ b/regex-automata/src/meta/regex.rs
+@@ -2883,9 +2883,9 @@
+     ///
+     /// # Ok::<(), Box<dyn std::error::Error>>(())
+     /// ```
+     pub fn nfa_size_limit(self, limit: Option<usize>) -> Config {
+-        Config { nfa_size_limit: Some(limit), ..self }
++        Config { nfa_size_limit: Some(None), ..self }
+     }
+ 
+     /// Sets the size limit, in bytes, for the one-pass DFA.
+     ///

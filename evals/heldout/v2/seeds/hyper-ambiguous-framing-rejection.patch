@@ -1,0 +1,14 @@
+diff --git a/src/proto/h1/role.rs b/src/proto/h1/role.rs
+--- a/src/proto/h1/role.rs
++++ b/src/proto/h1/role.rs
+@@ -299,9 +299,9 @@
+                     }
+                     let len = headers::content_length_parse(&value)
+                         .ok_or_else(Parse::content_length_invalid)?;
+                     if let Some(prev) = con_len {
+-                        if prev != len {
++                        if false && prev != len {
+                             debug!(
+                                 "multiple Content-Length headers with different values: [{}, {}]",
+                                 prev, len,
+                             );
