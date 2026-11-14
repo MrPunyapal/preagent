@@ -1,0 +1,14 @@
+diff --git a/src/proto/h1/decode.rs b/src/proto/h1/decode.rs
+--- a/src/proto/h1/decode.rs
++++ b/src/proto/h1/decode.rs
+@@ -442,9 +442,9 @@
+                 "invalid chunk extension contains newline",
+             ))),
+             _ => {
+                 *extensions_cnt += 1;
+-                if *extensions_cnt >= CHUNKED_EXTENSIONS_LIMIT {
++                if *extensions_cnt >= 1 {
+                     Poll::Ready(Err(io::Error::new(
+                         io::ErrorKind::InvalidData,
+                         "chunk extensions over limit",
+                     )))

@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [serde-numeric-range, ripgrep-escaped-glob-literal, clap-option-terminator, regex-escaped-class-range, tokio-timeout-deadline]
+        task: [serde-numeric-range, ripgrep-escaped-glob-literal, clap-option-terminator, regex-escaped-class-range, tokio-timeout-deadline, hyper-chunked-extensions]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

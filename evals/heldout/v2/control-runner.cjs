@@ -6,14 +6,14 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
 const base = __dirname;
-const enabled = new Set(['serde-numeric-range','ripgrep-escaped-glob-literal','clap-option-terminator','regex-escaped-class-range','tokio-timeout-deadline']);
+const enabled = new Set(['serde-numeric-range','ripgrep-escaped-glob-literal','clap-option-terminator','regex-escaped-class-range','tokio-timeout-deadline','hyper-chunked-extensions']);
 const taskId = process.argv[2];
 if (!enabled.has(taskId)) throw Error('task not enabled for controls');
 const manifest = JSON.parse(fs.readFileSync(path.join(base,'candidates.json'),'utf8'));
 const task = manifest.cases.find(c=>c.id===taskId);
 const repo = manifest.repositories.find(r=>r.id===task.repo_id);
 const pkg = repo.packages.find(p=>p.name===task.target_packages[0]);
-if (!new Set(['serde-rs/serde','BurntSushi/ripgrep','clap-rs/clap','rust-lang/regex','tokio-rs/tokio']).has(repo.github) ||
+if (!new Set(['serde-rs/serde','BurntSushi/ripgrep','clap-rs/clap','rust-lang/regex','tokio-rs/tokio','hyperium/hyper']).has(repo.github) ||
     !/^[0-9a-f]{40}$/.test(repo.revision) || task.target_packages.length!==1) {
   throw Error('untrusted source or ambiguous package');
 }
@@ -52,17 +52,28 @@ try {
  must('git',['checkout','--quiet','--detach',repo.revision],checkout);
  if(must('git',['rev-parse','HEAD'],checkout).stdout.trim()!==repo.revision)throw Error('pinned SHA mismatch');
  const manifestFile=path.join(checkout,...pkg.manifest_path.split('/'));
- const acceptanceDest=path.join(path.dirname(manifestFile),'tests','preagent_v2.rs');
- if(fs.existsSync(acceptanceDest))throw Error('acceptance destination already exists upstream');
- fs.mkdirSync(path.dirname(acceptanceDest),{recursive:true});
- fs.copyFileSync(abs(task.withheld_acceptance_test),acceptanceDest);
+ const sourceModule=task.acceptance_injection==='source_test_module';
+ if(sourceModule){
+   // Internal tests are appended in this temporary CI checkout only.
+   // Agent-facing workspaces must NOT include this acceptance module.
+   const target=path.join(checkout,...task.source_paths[0].split('/'));
+   fs.appendFileSync(target,'\n'+fs.readFileSync(abs(task.withheld_acceptance_test),'utf8'));
+ }else{
+   const acceptanceDest=path.join(path.dirname(manifestFile),'tests','preagent_v2.rs');
+   if(fs.existsSync(acceptanceDest))throw Error('acceptance destination already exists upstream');
+   fs.mkdirSync(path.dirname(acceptanceDest),{recursive:true});
+   fs.copyFileSync(abs(task.withheld_acceptance_test),acceptanceDest);
+ }
  const lockFile=path.join(checkout,'Cargo.lock');
  report.lockfile_in_upstream=fs.existsSync(lockFile);
  must('cargo',['fetch','--manifest-path',manifestFile],checkout);
  if(!fs.existsSync(lockFile))throw Error('Cargo.lock not resolved');
  report.lockfile_sha256=sha(fs.readFileSync(lockFile));
- const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:[];
- const args=['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
+ const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:
+   task.repo_id==='hyper'?['--features','http1']:[];
+ const args=sourceModule?
+   ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
+   ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
  const clean=exec('cargo',args,checkout,900000,{CARGO_NET_OFFLINE:'true'});
  report.clean={status:clean.code===0&&/test result: ok\. [1-9]\d* passed/.test(clean.stdout)?
    'acceptance_passed':'infrastructure_or_build_failure',exit_code:clean.code,
