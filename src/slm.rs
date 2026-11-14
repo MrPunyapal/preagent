@@ -61,7 +61,8 @@ fn query_models(address: SocketAddr, timeout: Duration) -> Result<Vec<String>, S
     let request = "GET /api/tags HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n";
     let raw = send_request(address, request, timeout)?;
     let body = parse_http_body(&raw)?;
-    let text = std::str::from_utf8(&body).map_err(|_| "local models response is not valid UTF-8")?;
+    let text =
+        std::str::from_utf8(&body).map_err(|_| "local models response is not valid UTF-8")?;
     model_names(text)
 }
 
@@ -814,7 +815,10 @@ mod tests {
         )
         .unwrap();
         assert_eq!(names, vec!["qwen2.5-coder:0.5b", "qwen2.5:7b"]);
-        assert_eq!(model_names(r#"{"models":[]}"#).unwrap(), Vec::<String>::new());
+        assert_eq!(
+            model_names(r#"{"models":[]}"#).unwrap(),
+            Vec::<String>::new()
+        );
         for bad in [
             r#"{}"#,
             r#"{"models":{}}"#,
