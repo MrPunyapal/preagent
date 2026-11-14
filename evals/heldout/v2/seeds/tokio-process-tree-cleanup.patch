@@ -1,0 +1,12 @@
+diff --git a/tokio/src/process/mod.rs b/tokio/src/process/mod.rs
+--- a/tokio/src/process/mod.rs
++++ b/tokio/src/process/mod.rs
+@@ -662,7 +662,7 @@
+     /// a [`Child`] handle where possible, and instead utilize `child.wait().await`
+     /// or `child.kill().await` where possible.
+     pub fn kill_on_drop(&mut self, kill_on_drop: bool) -> &mut Command {
+-        self.kill_on_drop = kill_on_drop;
++        self.kill_on_drop = false;
+         self
+     }
+ 

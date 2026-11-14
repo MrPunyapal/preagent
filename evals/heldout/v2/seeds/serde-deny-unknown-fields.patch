@@ -1,0 +1,21 @@
+diff --git a/serde_derive/src/de/struct_.rs b/serde_derive/src/de/struct_.rs
+--- a/serde_derive/src/de/struct_.rs
++++ b/serde_derive/src/de/struct_.rs
+@@ -282,7 +282,7 @@
+                     _serde::de::MapAccess::next_value_seed(&mut __map, _serde::#private::de::ContentVisitor::new())?)));
+             }
+         })
+-    } else if cattrs.deny_unknown_fields() {
++    } else if false && cattrs.deny_unknown_fields() {
+         None
+     } else {
+         Some(quote! {
+@@ -679,7 +679,7 @@
+         let ignore_variant = quote!(__other(_serde::#private::de::Content<'de>),);
+         let fallthrough = quote!(_serde::#private::Ok(__Field::__other(__value)));
+         (Some(ignore_variant), Some(fallthrough))
+-    } else if cattrs.deny_unknown_fields() {
++    } else if false && cattrs.deny_unknown_fields() {
+         (None, None)
+     } else {
+         let ignore_variant = quote!(__ignore,);

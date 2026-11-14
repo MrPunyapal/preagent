@@ -84,7 +84,7 @@ try {
  must('cargo',['fetch','--locked','--manifest-path',manifestFile],checkout);
  if(sha(fs.readFileSync(lockFile))!==snapshot.lock_sha256)
    throw Error('Cargo modified pinned dependency resolution');
- const extraFeatures=task.repo_id==='tokio'?['--features','rt,time,sync']:
+ const extraFeatures=task.repo_id==='tokio'?['--features','rt,time,sync,process']:
    task.repo_id==='hyper'?['--features','full']:[];
  const args=sourceModule?
    ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:

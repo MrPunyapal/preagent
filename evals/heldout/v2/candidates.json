@@ -289,8 +289,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/tokio-process-tree-cleanup.patch",
+      "withheld_acceptance_test": "acceptance/tokio-process-tree-cleanup.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -468,7 +468,7 @@
       "task_class": "security_sensitive",
       "repo_id": "serde",
       "source_paths": [
-        "serde_derive/src/de.rs"
+        "serde_derive/src/de/struct_.rs"
       ],
       "prompt": "Repair a planted rejection-bypass in a derived type using deny_unknown_fields, without rejecting valid known fields.",
       "acceptance_criteria": [
@@ -481,8 +481,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/serde-deny-unknown-fields.patch",
+      "withheld_acceptance_test": "acceptance/serde-deny-unknown-fields.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -1059,8 +1059,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/clap-argv-literal-safety.patch",
+      "withheld_acceptance_test": "acceptance/clap-argv-literal-safety.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {

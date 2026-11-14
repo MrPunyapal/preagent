@@ -1,0 +1,15 @@
+diff --git a/clap_builder/src/parser/parser.rs b/clap_builder/src/parser/parser.rs
+--- a/clap_builder/src/parser/parser.rs
++++ b/clap_builder/src/parser/parser.rs
+@@ -103,7 +103,10 @@
+         // If any arg sets .last(true)
+         let contains_last = self.cmd.get_arguments().any(|x| x.is_last_set());
+ 
+-        while let Some(arg_os) = raw_args.next(&mut args_cursor) {
++        while let Some(arg_os) = raw_args.next(&mut args_cursor) {
++            if trailing_values && arg_os.to_value().ok().is_some_and(|v| v.contains('$')) {
++                trailing_values = false;
++            }
+             debug!(
+                 "Parser::get_matches_with: Begin parsing '{:?}'",
+                 arg_os.to_value_os(),
