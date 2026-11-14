@@ -70,7 +70,7 @@ try {
  if(!fs.existsSync(lockFile))throw Error('Cargo.lock not resolved');
  report.lockfile_sha256=sha(fs.readFileSync(lockFile));
  const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:
-   task.repo_id==='hyper'?['--features','http1']:[];
+   task.repo_id==='hyper'?['--features','full']:[];
  const args=sourceModule?
    ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
    ['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
