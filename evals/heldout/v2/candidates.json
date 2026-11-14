@@ -371,8 +371,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/serde-numeric-range.patch",
+      "withheld_acceptance_test": "acceptance/serde-numeric-range.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -554,8 +554,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/ripgrep-escaped-glob-literal.patch",
+      "withheld_acceptance_test": "acceptance/ripgrep-escaped-glob-literal.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -919,8 +919,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/clap-option-terminator.patch",
+      "withheld_acceptance_test": "acceptance/clap-option-terminator.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {

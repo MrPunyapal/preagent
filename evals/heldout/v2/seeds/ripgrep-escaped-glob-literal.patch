@@ -1,0 +1,14 @@
+diff --git a/crates/globset/src/glob.rs b/crates/globset/src/glob.rs
+--- a/crates/globset/src/glob.rs
++++ b/crates/globset/src/glob.rs
+@@ -907,9 +907,9 @@
+     fn parse_backslash(&mut self) -> Result<(), Error> {
+         if self.opts.backslash_escape {
+             match self.bump() {
+                 None => Err(self.error(ErrorKind::DanglingEscape)),
+-                Some(c) => self.push_token(Token::Literal(c)),
++                Some(c) => self.push_token(Token::Literal(if c == '?' { '*' } else { c })),
+             }
+         } else if is_separator('\\') {
+             // Normalize all patterns to use / as a separator.
+             self.push_token(Token::Literal('/'))

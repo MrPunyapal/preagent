@@ -1,0 +1,32 @@
+name: Held-out v2 candidate controls
+
+on:
+  push:
+    paths:
+      - '.github/workflows/heldout-v2-controls.yml'
+      - 'evals/heldout/v2/**'
+
+permissions:
+  contents: read
+
+jobs:
+  controlled:
+    name: Verify seed (${{ matrix.task }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [serde-numeric-range, ripgrep-escaped-glob-literal, clap-option-terminator]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run pinned green/red acceptance controls
+        run: node evals/heldout/v2/control-runner.cjs ${{ matrix.task }}
+      - name: Preserve raw control results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-controls-${{ matrix.task }}
+          path: target/validation/v2-controls/${{ matrix.task }}.json
+          if-no-files-found: warn

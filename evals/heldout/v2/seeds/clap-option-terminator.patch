@@ -1,0 +1,14 @@
+diff --git a/clap_builder/src/parser/parser.rs b/clap_builder/src/parser/parser.rs
+--- a/clap_builder/src/parser/parser.rs
++++ b/clap_builder/src/parser/parser.rs
+@@ -140,9 +140,9 @@
+                         }) {
+                             // count as both an escape and terminator
+                             pos_counter += 1;
+                         }
+-                        trailing_values = true;
++                        trailing_values = false;
+                         matcher.start_trailing();
+                         continue;
+                     }
+                 } else if let Some((long_arg, long_value)) = arg_os.to_long() {
