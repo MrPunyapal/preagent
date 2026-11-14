@@ -1,0 +1,4 @@
+# These files are sha256-pinned exact GitHub Actions artifacts.
+# Do not rewrite line endings on Windows checkouts.
+evals/heldout/v2/locks/*.lock -text
+evals/heldout/v2/licenses/*.json -text
