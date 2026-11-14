@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "suite": "heldout-v2",
+  "reviewer_id": "",
+  "reviewed_at": "",
+  "independently_completed": false,
+  "records": [
+    {
+      "task_id": "tokio-timeout-deadline",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "tokio-oneshot-cleanup",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "tokio-bounded-backpressure-tests",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "tokio-process-tree-cleanup",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "tokio-time-interval-coordination",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "tokio-scheduler-cancellation-boundary",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-numeric-range",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-serialize-container-sharing",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-derive-alias-coverage",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-deny-unknown-fields",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-derive-renames-roundtrip",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "serde-core-derive-visitor-boundary",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-escaped-glob-literal",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-ignore-precedence",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-option-terminator-tests",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-preprocessor-argv-safety",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-json-printer-summary",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "ripgrep-walker-policy-isolation",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-escaped-class-range",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-meta-search-consistency",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-utf8-boundary-tests",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-regex-size-limit",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-unicode-flag-crossmodule",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "regex-engine-selection-contract",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-option-terminator",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-help-layout-refactor",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-alias-validation-tests",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-argv-literal-safety",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-usage-help-agreement",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "clap-builder-parser-separation",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-chunked-extensions",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-header-parse-refactor",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-pipelining-regression-tests",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-ambiguous-framing-rejection",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-eof-coordination",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    },
+    {
+      "task_id": "hyper-conn-dispatch-boundary",
+      "tier": null,
+      "rationale": "",
+      "uncertainty_notes": ""
+    }
+  ]
+}

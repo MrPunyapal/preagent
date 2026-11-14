@@ -376,8 +376,16 @@
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
-        "clean": null,
-        "seeded": null
+        "clean": {
+          "status": "acceptance_passed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732662",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        },
+        "seeded": {
+          "status": "acceptance_failed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732662",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        }
       },
       "target_packages": [
         "serde_core"
@@ -559,8 +567,16 @@
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
-        "clean": null,
-        "seeded": null
+        "clean": {
+          "status": "acceptance_passed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732889",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        },
+        "seeded": {
+          "status": "acceptance_failed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732889",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        }
       },
       "target_packages": [
         "globset"
@@ -924,8 +940,16 @@
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
-        "clean": null,
-        "seeded": null
+        "clean": {
+          "status": "acceptance_passed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732848",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        },
+        "seeded": {
+          "status": "acceptance_failed",
+          "evidence": "https://github.com/MrPunyapal/preagent/actions/runs/43581079657/job/132405732848",
+          "run_sha": "604cfe19ab918d0c8d12a5172d980e97ebb9c332"
+        }
       },
       "target_packages": [
         "clap_builder"
