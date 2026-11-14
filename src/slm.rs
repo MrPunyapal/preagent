@@ -106,8 +106,81 @@ fn query(
         if raw.len() as u64 > MAX_REPLY_BYTES {
             return Err("local response exceeded size limit".to_string());
         }
+        if framed_response_complete(&raw)? {
+            break;
+        }
     }
     parse_http_response(&raw)
+}
+
+// HTTP/1.1 servers may keep a socket open even after a complete response.
+// Do not wait for EOF when a bounded message body has already arrived.
+// Unframed responses still require EOF, and the final parser validates them.
+fn framed_response_complete(raw: &[u8]) -> Result<bool, String> {
+    let Some(header_end) = raw.windows(4).position(|bytes| bytes == b"\r\n\r\n") else {
+        return Ok(false);
+    };
+    let headers =
+        std::str::from_utf8(&raw[..header_end]).map_err(|_| "local server sent invalid headers")?;
+    let mut content_length = None;
+    let mut chunked = false;
+    for line in headers.lines().skip(1) {
+        let (name, value) = line.split_once(':').ok_or("malformed HTTP header")?;
+        if name.eq_ignore_ascii_case("content-length") {
+            if content_length.is_some() {
+                return Err("duplicate HTTP content length".into());
+            }
+            content_length = Some(
+                value
+                    .trim()
+                    .parse::<usize>()
+                    .map_err(|_| "invalid HTTP content length")?,
+            );
+        } else if name.eq_ignore_ascii_case("transfer-encoding") {
+            if chunked || !value.trim().eq_ignore_ascii_case("chunked") {
+                return Err("unsupported HTTP transfer encoding".into());
+            }
+            chunked = true;
+        }
+    }
+    if chunked && content_length.is_some() {
+        return Err("ambiguous HTTP framing".into());
+    }
+    let payload = &raw[header_end + 4..];
+    if let Some(length) = content_length {
+        if length as u64 > MAX_REPLY_BYTES {
+            return Err("local response exceeded size limit".into());
+        }
+        return Ok(payload.len() >= length);
+    }
+    if chunked {
+        return chunked_response_complete(payload);
+    }
+    Ok(false)
+}
+
+fn chunked_response_complete(mut payload: &[u8]) -> Result<bool, String> {
+    loop {
+        let Some(line_end) = payload.windows(2).position(|bytes| bytes == b"\r\n") else {
+            return Ok(false);
+        };
+        let length =
+            std::str::from_utf8(&payload[..line_end]).map_err(|_| "invalid HTTP chunk length")?;
+        let size = usize::from_str_radix(length.split(';').next().unwrap_or(""), 16)
+            .map_err(|_| "invalid HTTP chunk size")?;
+        payload = &payload[line_end + 2..];
+        if size == 0 {
+            return Ok(payload.len() >= 2);
+        }
+        let end = size.checked_add(2).ok_or("HTTP chunk size overflow")?;
+        if payload.len() < end {
+            return Ok(false);
+        }
+        if &payload[size..end] != b"\r\n" {
+            return Err("invalid HTTP chunk terminator".into());
+        }
+        payload = &payload[end..];
+    }
 }
 
 fn remaining(deadline: Instant) -> Result<Duration, String> {
@@ -583,6 +656,45 @@ mod tests {
         });
         assert!(query(address, "test", "mock", Duration::from_secs(2)).is_err());
         child.join().unwrap();
+    }
+
+    #[test]
+    fn framed_responses_do_not_wait_for_socket_close() {
+        for chunked in [false, true] {
+            let server = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+            let address = server.local_addr().unwrap();
+            let child = thread::spawn(move || {
+                let (mut stream, _) = server.accept().unwrap();
+                stream
+                    .set_read_timeout(Some(Duration::from_secs(3)))
+                    .unwrap();
+                let mut buffer = [0; 8192];
+                assert!(stream.read(&mut buffer).unwrap() > 0);
+                let body = r#"{"response":"standard","done":true}"#;
+                let wire = if chunked {
+                    format!(
+                        "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n{:X}\r\n{}\r\n0\r\n\r\n",
+                        body.len(),
+                        body
+                    )
+                } else {
+                    format!(
+                        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+                        body.len(),
+                        body
+                    )
+                };
+                stream.write_all(wire.as_bytes()).unwrap();
+                // Simulate a local HTTP server retaining the connection despite
+                // the client's request to close it. A read-to-EOF client times out.
+                thread::sleep(Duration::from_millis(1500));
+            });
+            assert_eq!(
+                query(address, "Fix a bug", "example-local", Duration::from_millis(900)).unwrap(),
+                Tier::Standard
+            );
+            child.join().unwrap();
+        }
     }
 
     #[test]
