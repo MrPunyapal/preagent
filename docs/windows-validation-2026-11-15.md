@@ -96,8 +96,10 @@ The six candidate-control jobs and current cross-platform CI run also passed
 on the latest commit ([CI run](https://github.com/MrPunyapal/preagent/actions/runs/43595268135)).
 
 The v2 registry remains a candidate, not a frozen benchmark: it has 36 cases
-across six repositories and six task classes, but only 6/36 cases have
-verified clean-positive and seeded-negative controls. The 12 package-level
+across six repositories and six task classes. After this local validation,
+the expanded controls workflow verified 16/36 clean-positive and
+seeded-negative controls (see [the follow-up evidence](heldout-v2-controls-2026-11-15.md));
+20 tasks still lack complete fixture controls. The 12 package-level
 dependency/license scopes still require human audits, and the candidate tasks
 still require two independent human complexity reviews each. No v2 model or
 coding-agent scores were produced. Do not use the candidate set for scoring or

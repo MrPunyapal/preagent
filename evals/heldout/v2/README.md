@@ -90,12 +90,13 @@ claims or label tuning.
 6. Obtain human signoff and move to a separate `frozen` manifest revision.
    A freeze must fail if any gate is unmet; do not relabel to increase scores.
 
-**Current evidence (November 14, 2026):** six v2 tasks, one per upstream
-repository, now have seed patches, executable withheld acceptance tests and
-verified green-clean/red-seeded checks in GitHub Actions. **Thirty other
-candidate tasks still lack those fixtures and controls.** No v2 model runs,
-SLM classification, task-repair outcomes or independent complexity reviews
-exist. See [verified controls](../../../docs/heldout-v2-controls-2026-11-14.md)
+**Current evidence (November 15, 2026):** 16 of 36 v2 tasks have seed patches,
+executable acceptance tests and verified green-clean/red-seeded controls in
+GitHub Actions. **Twenty other candidates still lack a complete controlled
+fixture.** No v2 model runs, SLM classification, task-repair outcomes or
+independent complexity reviews exist. See the
+[latest control evidence](../../../docs/heldout-v2-controls-2026-11-15.md),
+the [November 14 control snapshot](../../../docs/heldout-v2-controls-2026-11-14.md),
 and the [pinned license-inventory findings](../../../docs/heldout-v2-license-inventory-2026-11-14.md).
 
 For genuine human reviews, use the [blind review packet](review/packet.md),
