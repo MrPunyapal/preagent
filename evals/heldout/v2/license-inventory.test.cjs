@@ -24,7 +24,7 @@ test('graph closure includes direct and transitive dependencies once',()=>{
 test('inventory does not certify license declarations as legal approvals',()=>{
  const pkg={name:'dep',license:null};
  assert.equal(pkg.license,null);
- const workflow=fs.readFileSync(path.join(__dirname,'../../.github/workflows/heldout-v2-licenses.yml'),'utf8');
+ const workflow=fs.readFileSync(path.join(__dirname,'../../../.github/workflows/heldout-v2-licenses.yml'),'utf8');
  assert.match(workflow,/declared-license/);
  assert.doesNotMatch(workflow,/license-approved/);
 });
