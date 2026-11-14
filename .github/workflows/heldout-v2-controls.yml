@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/heldout-v2-controls.yml'
       - 'evals/heldout/v2/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
