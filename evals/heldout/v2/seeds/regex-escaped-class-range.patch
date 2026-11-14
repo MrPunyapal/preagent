@@ -1,0 +1,26 @@
+diff --git a/regex-syntax/src/ast/parse.rs b/regex-syntax/src/ast/parse.rs
+--- a/regex-syntax/src/ast/parse.rs
++++ b/regex-syntax/src/ast/parse.rs
+@@ -1525,15 +1525,15 @@
+ 
+         // Handle all of the one letter sequences inline.
+         self.bump();
+         let span = Span::new(start, self.pos());
+-        if is_meta_character(c) {
+-            return Ok(Primitive::Literal(ast::Literal {
+-                span,
+-                kind: ast::LiteralKind::Meta,
+-                c,
+-            }));
+-        }
++        if is_meta_character(c) {
++            return Ok(Primitive::Literal(ast::Literal {
++                span,
++                kind: ast::LiteralKind::Meta,
++                c: if c == '-' { '*' } else { c },
++            }));
++        }
+         if is_escapeable_character(c) {
+             return Ok(Primitive::Literal(ast::Literal {
+                 span,
+                 kind: ast::LiteralKind::Superfluous,

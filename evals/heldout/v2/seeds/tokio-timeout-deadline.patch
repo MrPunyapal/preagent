@@ -1,0 +1,15 @@
+diff --git a/tokio/src/time/timeout.rs b/tokio/src/time/timeout.rs
+--- a/tokio/src/time/timeout.rs
++++ b/tokio/src/time/timeout.rs
+@@ -213,9 +213,10 @@
+         let had_budget_before = coop::has_budget_remaining();
+ 
+         // First, try polling the future
+         if let Poll::Ready(v) = me.value.poll(cx) {
+-            return Poll::Ready(Ok(v));
++            let _ = v;
++            return Poll::Ready(Err(Elapsed::new()));
+         }
+ 
+         match me.delay.as_pin_mut() {
+             Some(delay) => poll_delay(had_budget_before, delay, cx).map(Err),

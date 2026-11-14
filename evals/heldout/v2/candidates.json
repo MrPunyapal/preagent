@@ -189,8 +189,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/tokio-timeout-deadline.patch",
+      "withheld_acceptance_test": "acceptance/tokio-timeout-deadline.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {
@@ -752,8 +752,8 @@
         "upstream_issue": null,
         "fix_commit": null
       },
-      "seed_patch": null,
-      "withheld_acceptance_test": null,
+      "seed_patch": "seeds/regex-escaped-class-range.patch",
+      "withheld_acceptance_test": "acceptance/regex-escaped-class-range.rs",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {

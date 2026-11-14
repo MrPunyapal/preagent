@@ -6,14 +6,14 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const cp = require('node:child_process');
 const base = __dirname;
-const enabled = new Set(['serde-numeric-range','ripgrep-escaped-glob-literal','clap-option-terminator']);
+const enabled = new Set(['serde-numeric-range','ripgrep-escaped-glob-literal','clap-option-terminator','regex-escaped-class-range','tokio-timeout-deadline']);
 const taskId = process.argv[2];
 if (!enabled.has(taskId)) throw Error('task not enabled for controls');
 const manifest = JSON.parse(fs.readFileSync(path.join(base,'candidates.json'),'utf8'));
 const task = manifest.cases.find(c=>c.id===taskId);
 const repo = manifest.repositories.find(r=>r.id===task.repo_id);
 const pkg = repo.packages.find(p=>p.name===task.target_packages[0]);
-if (!new Set(['serde-rs/serde','BurntSushi/ripgrep','clap-rs/clap']).has(repo.github) ||
+if (!new Set(['serde-rs/serde','BurntSushi/ripgrep','clap-rs/clap','rust-lang/regex','tokio-rs/tokio']).has(repo.github) ||
     !/^[0-9a-f]{40}$/.test(repo.revision) || task.target_packages.length!==1) {
   throw Error('untrusted source or ambiguous package');
 }
@@ -61,7 +61,8 @@ try {
  must('cargo',['fetch','--manifest-path',manifestFile],checkout);
  if(!fs.existsSync(lockFile))throw Error('Cargo.lock not resolved');
  report.lockfile_sha256=sha(fs.readFileSync(lockFile));
- const args=['test','--offline','--manifest-path',manifestFile,'--test','preagent_v2','--','--nocapture'];
+ const extraFeatures=task.repo_id==='tokio'?['--features','rt,time']:[];
+ const args=['test','--offline','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
  const clean=exec('cargo',args,checkout,900000,{CARGO_NET_OFFLINE:'true'});
  report.clean={status:clean.code===0&&/test result: ok\. [1-9]\d* passed/.test(clean.stdout)?
    'acceptance_passed':'infrastructure_or_build_failure',exit_code:clean.code,
