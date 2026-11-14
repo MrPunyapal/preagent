@@ -31,6 +31,12 @@ Classify a request with no AI service:
     cargo run -- route --no-git --json "Fix README typo"
     cargo run -- eval
     cargo run -- doctor
+    cargo run -- models
+    cargo run -- models --json
+
+The models command reads only the local Ollama /api/tags endpoint. It does
+not download or execute models, and listed names do not prove that a model
+runs offline, supports tools, or has a particular license.
 
 Use an already installed local Ollama model to analyze uncertain prompts:
 

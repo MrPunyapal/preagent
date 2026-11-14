@@ -39,6 +39,7 @@ pub enum Action {
     Run(Options),
     Eval { json: bool },
     Doctor { json: bool },
+    Models { json: bool },
     Heldout(crate::heldout::Command),
 }
 
@@ -51,6 +52,7 @@ USAGE
                  [--effort LEVEL] [--no-git] <prompt>
     preagent eval [--json]
     preagent doctor [--json]
+    preagent models [--json]
     preagent heldout list [--json]
     preagent heldout route [--json] [--slm INSTALLED_MODEL]
     preagent heldout prepare TASK LOCAL_CLONE NEW_DIRECTORY
@@ -63,6 +65,7 @@ COMMANDS
     run      Start the selected coding agent with the ORIGINAL prompt.
     eval     Score the built-in, labeled routing smoke corpus (no AI calls).
     doctor   Report installed agents and loopback Ollama availability.
+    models   List models registered with local Ollama (no downloads).
     heldout  Frozen task evaluation without paid coding-agent runs.
 
 OPTIONS
@@ -92,7 +95,7 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
     match command.as_str() {
         "-h" | "--help" | "help" => return Ok(Action::Help),
         "-V" | "--version" | "version" => return Ok(Action::Version),
-        "route" | "run" | "eval" | "doctor" | "heldout" => {}
+        "route" | "run" | "eval" | "doctor" | "models" | "heldout" => {}
         _ => return Err(format!("unknown command '{command}'")),
     }
 
@@ -100,7 +103,7 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
         return crate::heldout::parse(args).map(Action::Heldout);
     }
 
-    if command == "eval" || command == "doctor" {
+    if command == "eval" || command == "doctor" || command == "models" {
         let mut json = false;
         for option in args {
             if option == "--json" {
@@ -109,10 +112,10 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
                 return Err(format!("unknown option '{option}' for {command}"));
             }
         }
-        return if command == "doctor" {
-            Ok(Action::Doctor { json })
-        } else {
-            Ok(Action::Eval { json })
+        return match command.as_str() {
+            "doctor" => Ok(Action::Doctor { json }),
+            "models" => Ok(Action::Models { json }),
+            _ => Ok(Action::Eval { json }),
         };
     }
 
@@ -249,6 +252,19 @@ mod tests {
             panic!("expected run");
         };
         assert_eq!(options.agent, Agent::OpenCode);
+    }
+
+    #[test]
+    fn models_accepts_json_without_prompt() {
+        assert_eq!(
+            parse_words(&["models"]).unwrap(),
+            Action::Models { json: false }
+        );
+        assert_eq!(
+            parse_words(&["models", "--json"]).unwrap(),
+            Action::Models { json: true }
+        );
+        assert!(parse_words(&["models", "unexpected"]).is_err());
     }
 
     #[test]

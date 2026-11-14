@@ -17,29 +17,52 @@ pub fn safer_tier(baseline: Tier, suggested: Tier) -> Tier {
     }
 }
 
-pub fn classify(prompt: &str, model: &str) -> Result<Tier, String> {
-    if model.is_empty()
-        || model.len() > 128
-        || !model
+fn valid_model_name(model: &str) -> bool {
+    !model.is_empty()
+        && model.len() <= 128
+        && model
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || b"_./:-".contains(&b))
-    {
-        return Err("invalid local model identifier".to_string());
-    }
-    let port = match std::env::var("PREAGENT_OLLAMA_PORT") {
+}
+
+fn local_port() -> Result<u16, String> {
+    match std::env::var("PREAGENT_OLLAMA_PORT") {
         Ok(value) => value
             .parse::<u16>()
             .ok()
             .filter(|value| *value != 0)
             .ok_or("PREAGENT_OLLAMA_PORT must be a nonzero port")?,
         Err(_) => 11434,
-    };
+    }
+}
+
+pub fn classify(prompt: &str, model: &str) -> Result<Tier, String> {
+    if !valid_model_name(model) {
+        return Err("invalid local model identifier".to_string());
+    }
     query(
-        SocketAddr::from(([127, 0, 0, 1], port)),
+        SocketAddr::from(([127, 0, 0, 1], local_port()?)),
         prompt,
         model,
         TIMEOUT,
     )
+}
+
+/// Lists the model names reported by the already-running local Ollama.
+/// Names alone do not establish offline availability, licensing or tool support.
+pub fn installed_models() -> Result<Vec<String>, String> {
+    query_models(
+        SocketAddr::from(([127, 0, 0, 1], local_port()?)),
+        Duration::from_secs(5),
+    )
+}
+
+fn query_models(address: SocketAddr, timeout: Duration) -> Result<Vec<String>, String> {
+    let request = "GET /api/tags HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n";
+    let raw = send_request(address, request, timeout)?;
+    let body = parse_http_body(&raw)?;
+    let text = std::str::from_utf8(&body).map_err(|_| "local models response is not valid UTF-8")?;
+    model_names(text)
 }
 
 fn query(
@@ -48,7 +71,6 @@ fn query(
     model: &str,
     timeout: Duration,
 ) -> Result<Tier, String> {
-    let deadline = Instant::now() + timeout;
     let classifier = format!(
         "Classify this developer coding task by complexity. Reply with EXACTLY ONE \
          lowercase word: simple, standard, or complex. \
@@ -62,6 +84,9 @@ fn query(
         json_quote(model),
         json_quote(&classifier)
     );
+
+fn send_request(address: SocketAddr, request: &str, timeout: Duration) -> Result<Vec<u8>, String> {
+    let deadline = Instant::now() + timeout;
     let mut stream = TcpStream::connect_timeout(&address, timeout)
         .map_err(|error| format!("cannot connect to local Ollama ({error})"))?;
     stream
@@ -77,6 +102,9 @@ fn query(
         body.len(),
         body
     );
+    let raw = send_request(address, &request, timeout)?;
+    parse_http_response(&raw)
+}
     let mut pending = request.as_bytes();
     while !pending.is_empty() {
         stream
@@ -110,7 +138,7 @@ fn query(
             break;
         }
     }
-    parse_http_response(&raw)
+    Ok(raw)
 }
 
 // HTTP/1.1 servers may keep a socket open even after a complete response.
@@ -191,6 +219,19 @@ fn remaining(deadline: Instant) -> Result<Duration, String> {
 }
 
 fn parse_http_response(raw: &[u8]) -> Result<Tier, String> {
+    let body = parse_http_body(raw)?;
+    let document =
+        std::str::from_utf8(&body).map_err(|_| "local model response is not valid UTF-8")?;
+    let reply = response_field(document)?;
+    match reply.trim().to_ascii_lowercase().as_str() {
+        "simple" => Ok(Tier::Simple),
+        "standard" => Ok(Tier::Standard),
+        "complex" => Ok(Tier::Complex),
+        _ => Err("local SLM did not return one recognized tier".to_string()),
+    }
+}
+
+fn parse_http_body(raw: &[u8]) -> Result<Vec<u8>, String> {
     let header_end = raw
         .windows(4)
         .position(|bytes| bytes == b"\r\n\r\n")
@@ -246,15 +287,7 @@ fn parse_http_response(raw: &[u8]) -> Result<Tier, String> {
     } else {
         payload.to_vec()
     };
-    let document =
-        std::str::from_utf8(&body).map_err(|_| "local model response is not valid UTF-8")?;
-    let reply = response_field(document)?;
-    match reply.trim().to_ascii_lowercase().as_str() {
-        "simple" => Ok(Tier::Simple),
-        "standard" => Ok(Tier::Standard),
-        "complex" => Ok(Tier::Complex),
-        _ => Err("local SLM did not return one recognized tier".to_string()),
-    }
+    Ok(body)
 }
 
 fn decode_chunks(mut payload: &[u8]) -> Result<Vec<u8>, String> {
@@ -305,6 +338,76 @@ pub(crate) fn json_quote(value: &str) -> String {
     }
     result.push('"');
     result
+}
+
+// Validate a local /api/tags result without inferring any model capability.
+fn model_names(document: &str) -> Result<Vec<String>, String> {
+    let mut parser = JsonParser { rest: document };
+    parser.expect("{")?;
+    let mut models = None;
+    if !parser.consume("}") {
+        loop {
+            let key = parser.string()?;
+            parser.expect(":")?;
+            if key == "models" {
+                if models.is_some() {
+                    return Err("duplicate local models field".into());
+                }
+                parser.expect("[")?;
+                let mut names = Vec::new();
+                if !parser.consume("]") {
+                    loop {
+                        parser.expect("{")?;
+                        let mut name = None;
+                        if !parser.consume("}") {
+                            loop {
+                                let field = parser.string()?;
+                                parser.expect(":")?;
+                                if field == "name" {
+                                    if name.is_some() {
+                                        return Err("duplicate local model name".into());
+                                    }
+                                    let JsonValue::String(text) = parser.value(1)? else {
+                                        return Err("local model name is not a string".into());
+                                    };
+                                    if !valid_model_name(&text) {
+                                        return Err("invalid local model identifier".into());
+                                    }
+                                    name = Some(text);
+                                } else {
+                                    parser.value(1)?;
+                                }
+                                if parser.consume("}") {
+                                    break;
+                                }
+                                parser.expect(",")?;
+                            }
+                        }
+                        names.push(name.ok_or("local model missing name")?);
+                        if parser.consume("]") {
+                            break;
+                        }
+                        parser.expect(",")?;
+                    }
+                }
+                models = Some(names);
+            } else {
+                parser.value(0)?;
+            }
+            if parser.consume("}") {
+                break;
+            }
+            parser.expect(",")?;
+        }
+    }
+    parser.whitespace();
+    if !parser.rest.is_empty() {
+        return Err("trailing data after local models response".into());
+    }
+    let mut names = models.ok_or("local models field missing")?;
+    names.sort();
+    names.dedup();
+    Ok(names)
 }
 
 // Validate the complete non-streaming envelope, including unrelated metadata.
@@ -701,6 +804,60 @@ mod tests {
             );
             child.join().unwrap();
         }
+    }
+
+    #[test]
+    fn parses_local_model_list_and_rejects_invalid_envelopes() {
+        let names = model_names(
+            r#"{"models":[{"name":"qwen2.5:7b","size":123,"details":{"format":"gguf"}},{"name":"qwen2.5-coder:0.5b"},{"name":"qwen2.5:7b"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(names, vec!["qwen2.5-coder:0.5b", "qwen2.5:7b"]);
+        assert_eq!(model_names(r#"{"models":[]}"#).unwrap(), Vec::<String>::new());
+        for bad in [
+            r#"{}"#,
+            r#"{"models":{}}"#,
+            r#"{"models":[{}]}"#,
+            r#"{"models":[{"name":"unsafe\nmodel"}]}"#,
+            r#"{"models":[{"name":42}]}"#,
+            r#"{"models":[],"models":[]}"#,
+            r#"{"models":[{"name":"ok",}]}"#,
+        ] {
+            assert!(model_names(bad).is_err(), "accepted {bad}");
+        }
+    }
+
+    #[test]
+    fn fetches_local_model_list_without_executing_a_model() {
+        let server = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let address = server.local_addr().unwrap();
+        let child = thread::spawn(move || {
+            let (mut stream, _) = server.accept().unwrap();
+            stream
+                .set_read_timeout(Some(Duration::from_secs(3)))
+                .unwrap();
+            let mut buffer = [0; 8192];
+            let n = stream.read(&mut buffer).unwrap();
+            let request = std::str::from_utf8(&buffer[..n]).unwrap();
+            assert!(request.starts_with("GET /api/tags HTTP/1.1"));
+            let body = r#"{"models":[{"name":"local-coder:small"}]}"#;
+            stream
+                .write_all(
+                    format!(
+                        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+                        body.len(),
+                        body
+                    )
+                    .as_bytes(),
+                )
+                .unwrap();
+            thread::sleep(Duration::from_millis(1200));
+        });
+        assert_eq!(
+            query_models(address, Duration::from_millis(900)).unwrap(),
+            vec!["local-coder:small"]
+        );
+        child.join().unwrap();
     }
 
     #[test]

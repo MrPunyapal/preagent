@@ -101,6 +101,34 @@ fn main() -> ExitCode {
             }
             ExitCode::SUCCESS
         }
+        Action::Models { json } => match slm::installed_models() {
+            Ok(models) => {
+                if json {
+                    let entries = models
+                        .iter()
+                        .map(|name| slm::json_quote(name))
+                        .collect::<Vec<_>>()
+                        .join(",");
+                    println!(
+                        "{{\"provider\":\"ollama\",\"models\":[{entries}],\"model_count\":{},\"offline_execution_verified\":false}}",
+                        models.len()
+                    );
+                } else {
+                    println!(
+                        "Ollama models registered on localhost ({}). Execution and capabilities not verified:",
+                        models.len()
+                    );
+                    for name in &models {
+                        println!("  {name}");
+                    }
+                }
+                ExitCode::SUCCESS
+            }
+            Err(message) => {
+                eprintln!("preagent: cannot list local Ollama models: {message}");
+                ExitCode::FAILURE
+            }
+        },
         Action::Eval { json } => match evaluation::evaluate_builtin() {
             Ok(report) => {
                 if json {
