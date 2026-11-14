@@ -85,16 +85,6 @@ fn query(
         json_quote(&classifier)
     );
 
-fn send_request(address: SocketAddr, request: &str, timeout: Duration) -> Result<Vec<u8>, String> {
-    let deadline = Instant::now() + timeout;
-    let mut stream = TcpStream::connect_timeout(&address, timeout)
-        .map_err(|error| format!("cannot connect to local Ollama ({error})"))?;
-    stream
-        .set_read_timeout(Some(timeout))
-        .map_err(|error| format!("failed to set local read timeout ({error})"))?;
-    stream
-        .set_write_timeout(Some(timeout))
-        .map_err(|error| format!("failed to set local write timeout ({error})"))?;
     let request = format!(
         "POST /api/generate HTTP/1.1\r\nHost: 127.0.0.1\r\n\
          Content-Type: application/json\r\nConnection: close\r\n\
@@ -105,6 +95,17 @@ fn send_request(address: SocketAddr, request: &str, timeout: Duration) -> Result
     let raw = send_request(address, &request, timeout)?;
     parse_http_response(&raw)
 }
+
+fn send_request(address: SocketAddr, request: &str, timeout: Duration) -> Result<Vec<u8>, String> {
+    let deadline = Instant::now() + timeout;
+    let mut stream = TcpStream::connect_timeout(&address, timeout)
+        .map_err(|error| format!("cannot connect to local Ollama ({error})"))?;
+    stream
+        .set_read_timeout(Some(timeout))
+        .map_err(|error| format!("failed to set local read timeout ({error})"))?;
+    stream
+        .set_write_timeout(Some(timeout))
+        .map_err(|error| format!("failed to set local write timeout ({error})"))?;
     let mut pending = request.as_bytes();
     while !pending.is_empty() {
         stream
