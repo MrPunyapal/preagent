@@ -9,7 +9,7 @@ test('all includes only complete fixtures',()=>{
  const list=testedIds(data);
  assert.ok(list.length>=6 && list.length<36);
  assert.ok(list.includes('tokio-timeout-deadline'));
- assert.ok(!list.includes('tokio-oneshot-cleanup'));
+ assert.ok(!list.includes('tokio-bounded-backpressure-tests'));
 });
 test('documentation and review edits do not rerun expensive controls',()=>{
  assert.deepEqual(changes(data,data,['evals/heldout/v2/review/README.md']),[]);
@@ -26,8 +26,8 @@ test('harness changes require all enabled controls',()=>{
 });
 test('new proposed case becomes active only with seed and acceptance source',()=>{
  const next=structuredClone(data);
- const c=next.cases.find(c=>c.id==='tokio-oneshot-cleanup');
- c.seed_patch='seeds/tokio-oneshot-cleanup.patch';
- c.withheld_acceptance_test='acceptance/tokio-oneshot-cleanup.rs';
- assert.deepEqual(changes(data,next,['evals/heldout/v2/candidates.json']),['tokio-oneshot-cleanup']);
+ const c=next.cases.find(c=>c.id==='tokio-bounded-backpressure-tests');
+ c.seed_patch='seeds/tokio-bounded-backpressure-tests.patch';
+ c.withheld_acceptance_test='acceptance/tokio-bounded-backpressure-tests.rs';
+ assert.deepEqual(changes(data,next,['evals/heldout/v2/candidates.json']),['tokio-bounded-backpressure-tests']);
 });
