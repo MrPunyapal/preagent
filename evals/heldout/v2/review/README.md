@@ -15,3 +15,21 @@
 Do not commit fabricated reviewer IDs or synthetic consensus data.
 The shared public packet cannot guarantee secrecy against model pretraining;
 acceptance tests must be withheld from the candidate worktree during grading.
+
+## Submission format validation
+
+To attach a review to the precise task prompts and acceptance contracts:
+
+```sh
+node evals/heldout/v2/review/check-submission.cjs fingerprint
+node evals/heldout/v2/review/check-submission.cjs MY_REVIEW.json
+```
+
+Copy the fingerprint into the `contract_sha256` field of your submission.
+The checker ensures one real-looking review record per task, valid tier,
+rationale, reviewer ID, date and claimed independence. **It cannot verify
+identity or independence.** That must be checked by a maintainer with the
+actual reviewers. Test submissions used for CI are programmatic only and are
+never stored as reviewer endorsements.
+
+Review coordination: https://github.com/MrPunyapal/preagent/issues/2
