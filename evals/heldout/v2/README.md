@@ -34,6 +34,34 @@ node evals/heldout/v2/check.cjs ready --json
   per class per upstream repository, no v1/smoke prompt reuse, and safe paths.
 - The unchanged v1 and smoke dataset Git blob IDs are verified by Node tests.
 
+## Candidate grading (experimental, NOT a benchmark result)
+
+Six cases with independently recorded green/red fixture controls now have a
+local, non-agent grader. After preparing a **disposable** pinned upstream Git
+checkout and repairing the controlled regression, use:
+
+```sh
+node evals/heldout/v2/grade.cjs tokio-timeout-deadline /path/to/pinned-candidate
+```
+
+The directory must be the root of the exact pinned Git checkout. The grader
+copies the candidate into a temporary directory without Git metadata or
+build output, replaces Cargo.lock with the checked-in pinned resolution,
+injects acceptance tests **only into that copy**, and runs targeted
+`cargo test --offline --locked`. It returns JSON with
+`acceptance_status` and `task_correctness: null`. Build errors, missing
+cached dependencies, crashes, timeouts and missing tests are not counted as
+failed behavioral acceptance tests. Pending cases without verified controls
+are rejected. This tool never launches a coding agent or performs inference.
+
+**Security:** Copying is not process sandboxing. Cargo build scripts and
+tests execute candidate code with the current user's privileges; Cargo's
+`--offline` option restricts dependency fetching but does not prevent
+arbitrary network or filesystem activity by that code. Run only reviewed
+fixtures in a disposable, appropriately isolated environment. The v2 set
+remains unfrozen, and these checks are not eligible for model-performance
+claims or label tuning.
+
 ## Blocking conditions before a genuine freeze
 
 1. Verify package-specific **transitive dependency license scope**, feature

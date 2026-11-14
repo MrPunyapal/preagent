@@ -42,6 +42,8 @@ jobs:
         run: node --test evals/heldout/v2/license-inventory.test.cjs
       - name: Test selective v2 fixture controls
         run: node --test evals/heldout/v2/select-controls.test.cjs
+      - name: Test isolated v2 candidate grader
+        run: node --test evals/heldout/v2/grade.test.cjs
       - name: Validate held-out v2 reviewer submission schema
         run: node --test evals/heldout/v2/review/check-submission.test.cjs
       - name: Build
