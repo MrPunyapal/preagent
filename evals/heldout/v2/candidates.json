@@ -888,6 +888,8 @@
       },
       "seed_patch": "seeds/regex-utf8-boundary-tests.patch",
       "withheld_acceptance_test": "acceptance/regex-utf8-boundary-tests.rs",
+      "acceptance_injection": "integration_test_module",
+      "acceptance_target": "integration",
       "independent_reviews": [],
       "dependency_scope_review": null,
       "controls": {

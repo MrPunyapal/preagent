@@ -36,7 +36,7 @@ node evals/heldout/v2/check.cjs ready --json
 
 ## Candidate grading (experimental, NOT a benchmark result)
 
-Six cases with independently recorded green/red fixture controls now have a
+Sixteen cases with independently recorded green/red fixture controls now have a
 local, non-agent grader. After preparing a **disposable** pinned upstream Git
 checkout and repairing the controlled regression, use:
 
@@ -47,7 +47,9 @@ node evals/heldout/v2/grade.cjs tokio-timeout-deadline /path/to/pinned-candidate
 The directory must be the root of the exact pinned Git checkout. The grader
 copies the candidate into a temporary directory without Git metadata or
 build output, replaces Cargo.lock with the checked-in pinned resolution,
-injects acceptance tests **only into that copy**, and runs targeted
+injects acceptance tests **only into that copy** (including into a registered
+existing integration-test target when a package disables automatic test
+discovery), and runs targeted
 `cargo test --offline --locked`. It returns JSON with
 `acceptance_status` and `task_correctness: null`. Build errors, missing
 cached dependencies, crashes, timeouts and missing tests are not counted as

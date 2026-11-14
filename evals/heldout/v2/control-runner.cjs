@@ -10,9 +10,12 @@ const taskId = process.argv[2];
 if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(taskId||''))throw Error('invalid task ID');
 const manifest = JSON.parse(fs.readFileSync(path.join(base,'candidates.json'),'utf8'));
 const task = manifest.cases.find(c=>c.id===taskId);
-if (!task || !task.seed_patch || !task.withheld_acceptance_test)
+if (!task || !task.seed_patch || !task.withheld_acceptance_test ||
+    !Array.isArray(task.source_paths) || !task.source_paths.length ||
+    task.source_paths.some(p=>typeof p!=='string' ||
+      !/^[A-Za-z0-9_.\/-]+$/.test(p) || p.split('/').some(x=>!x||x==='.'||x==='..')))
   throw Error('task lacks checked-in seed and acceptance fixtures');
-if (task.acceptance_injection && task.acceptance_injection!=='source_test_module')
+if (task.acceptance_injection && !['source_test_module','integration_test_module'].includes(task.acceptance_injection))
   throw Error('unrecognized acceptance injection');
 const repo = manifest.repositories.find(r=>r.id===task.repo_id);
 const pkg = repo.packages.find(p=>p.name===task.target_packages[0]);
@@ -24,6 +27,17 @@ for (const p of [pkg.manifest_path,task.seed_patch,task.withheld_acceptance_test
   if (!/^[A-Za-z0-9_.\/-]+$/.test(p) || p.includes('..') || path.isAbsolute(p)) {
     throw Error('unsafe source/test path');
   }
+}
+const integrationTarget=task.acceptance_injection==='integration_test_module';
+if (integrationTarget) {
+ const packageRoot=path.posix.dirname(pkg.manifest_path);
+ const sourcePath=task.source_paths[0].replace(/\\/g,'/');
+ const relativeSource=path.posix.relative(packageRoot,sourcePath);
+ if(task.source_paths.length!==1 || !relativeSource.startsWith('tests/') ||
+    !relativeSource.endsWith('.rs') || !/^[A-Za-z0-9_-]+$/.test(task.acceptance_target||''))
+   throw Error('unsafe existing integration-test target');
+} else if(task.acceptance_target!==undefined) {
+ throw Error('unexpected acceptance target');
 }
 const abs=p=>path.join(base,p);
 const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
@@ -56,8 +70,9 @@ try {
  if(must('git',['rev-parse','HEAD'],checkout).stdout.trim()!==repo.revision)throw Error('pinned SHA mismatch');
  const manifestFile=path.join(checkout,...pkg.manifest_path.split('/'));
  const sourceModule=task.acceptance_injection==='source_test_module';
- if(sourceModule){
-   // Internal tests are appended in this temporary CI checkout only.
+ const existingIntegrationModule=task.acceptance_injection==='integration_test_module';
+ if(sourceModule || existingIntegrationModule){
+   // Hidden tests are appended in this temporary CI checkout only.
    // Agent-facing workspaces must NOT include this acceptance module.
    const target=path.join(checkout,...task.source_paths[0].split('/'));
    fs.appendFileSync(target,'\n'+fs.readFileSync(abs(task.withheld_acceptance_test),'utf8'));
@@ -86,9 +101,10 @@ try {
    throw Error('Cargo modified pinned dependency resolution');
  const extraFeatures=task.repo_id==='tokio'?['--features','rt,time,sync,process']:
    task.repo_id==='hyper'?['--features','full']:[];
- const args=sourceModule?
-   ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--lib','preagent_v2','--','--nocapture']:
-   ['test','--offline','--locked','--manifest-path',manifestFile,...extraFeatures,'--test','preagent_v2','--','--nocapture'];
+ const targetArgs=sourceModule?['--lib','preagent_v2']:
+   existingIntegrationModule?['--test',task.acceptance_target]:['--test','preagent_v2'];
+ const args=['test','--offline','--locked','--manifest-path',manifestFile,
+   ...extraFeatures,...targetArgs,'--','--nocapture'];
  const clean=exec('cargo',args,checkout,900000,{CARGO_NET_OFFLINE:'true'});
  report.clean={status:clean.code===0&&/test result: ok\. [1-9]\d* passed/.test(clean.stdout)?
    'acceptance_passed':'infrastructure_or_build_failure',exit_code:clean.code,

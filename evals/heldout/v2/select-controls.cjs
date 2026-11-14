@@ -36,6 +36,7 @@ function changes(before,after,paths){
        prompt:t.prompt,acceptance_criteria:t.acceptance_criteria,
        seed_patch:t.seed_patch,withheld_acceptance_test:t.withheld_acceptance_test,
        source_paths:t.source_paths,acceptance_injection:t.acceptance_injection,
+       acceptance_target:t.acceptance_target,
        repo_id:t.repo_id,target_packages:t.target_packages
      });
      if(JSON.stringify(selected(x))!==JSON.stringify(selected(c)))impacted.add(c.id);

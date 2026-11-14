@@ -28,17 +28,25 @@ function configFor(id, manifest, catalog) {
       task.controls?.seeded?.status !== 'acceptance_failed') {
     throw Error('task controls are not verified; candidate grading is disabled');
   }
+  const repo = manifest.repositories.find(item => item.id === task.repo_id);
+  const pkg = repo?.packages.find(item => item.name === task.target_packages?.[0]);
+  const locked = catalog.repositories.find(item => item.id === task.repo_id);
   if (!safePath(task.withheld_acceptance_test) ||
       task.withheld_acceptance_test !== 'acceptance/' + id + '.rs' ||
       !Array.isArray(task.target_packages) || task.target_packages.length !== 1 ||
       !Array.isArray(task.source_paths) || task.source_paths.length < 1 ||
       task.source_paths.some(p => !safePath(p)) ||
-      ![undefined, 'source_test_module'].includes(task.acceptance_injection)) {
+      ![undefined, 'source_test_module', 'integration_test_module'].includes(task.acceptance_injection) ||
+      (task.acceptance_injection === 'integration_test_module' &&
+        (task.source_paths.length !== 1 ||
+         !path.posix.relative(path.posix.dirname(pkg?.manifest_path || ''), task.source_paths[0])
+           .startsWith('tests/') ||
+         !task.source_paths[0].endsWith('.rs') ||
+         !/^[A-Za-z0-9_-]+$/.test(task.acceptance_target || ''))) ||
+      (task.acceptance_injection !== 'integration_test_module' &&
+        task.acceptance_target !== undefined)) {
     throw Error('unsupported fixture configuration');
   }
-  const repo = manifest.repositories.find(item => item.id === task.repo_id);
-  const pkg = repo?.packages.find(item => item.name === task.target_packages[0]);
-  const locked = catalog.repositories.find(item => item.id === task.repo_id);
   if (!repo || !pkg || !locked || !SOURCES.has(repo.github) ||
       !/^[0-9a-f]{40}$/.test(repo.revision) ||
       repo.revision !== locked.revision || !safePath(pkg.manifest_path) ||
@@ -140,9 +148,10 @@ function snapshot(source, destination, budget = {files: 0, bytes: 0}, depth = 0,
 
 function injectAcceptance(checkout, config) {
   const test = fs.readFileSync(config.acceptance, 'utf8');
-  if (config.task.acceptance_injection === 'source_test_module') {
+  if (config.task.acceptance_injection === 'source_test_module' ||
+      config.task.acceptance_injection === 'integration_test_module') {
     const source = path.join(checkout, config.task.source_paths[0]);
-    if (!fs.statSync(source).isFile()) throw Error('source test module target is missing');
+    if (!fs.statSync(source).isFile()) throw Error('existing test module target is missing');
     fs.appendFileSync(source, '\n' + test);
   } else {
     const destination = path.join(path.dirname(path.join(checkout, config.pkg.manifest_path)),
@@ -151,6 +160,14 @@ function injectAcceptance(checkout, config) {
     fs.mkdirSync(path.dirname(destination), {recursive: true});
     fs.writeFileSync(destination, test);
   }
+}
+
+function cargoTestTarget(task) {
+  if (task.acceptance_injection === 'source_test_module') return ['--lib', 'preagent_v2'];
+  if (task.acceptance_injection === 'integration_test_module') {
+    return ['--test', task.acceptance_target];
+  }
+  return ['--test', 'preagent_v2'];
 }
 
 function grade(id, candidate) {
@@ -166,11 +183,8 @@ function grade(id, candidate) {
     const manifestPath = path.join(scratch, config.pkg.manifest_path);
     const extraFeatures = config.repo.id === 'tokio' ? ['--features', 'rt,time,sync,process'] :
       config.repo.id === 'hyper' ? ['--features', 'full'] : [];
-    const cargoArgs = config.task.acceptance_injection === 'source_test_module' ?
-      ['test', '--offline', '--locked', '--manifest-path', manifestPath,
-        ...extraFeatures, '--lib', 'preagent_v2', '--', '--nocapture'] :
-      ['test', '--offline', '--locked', '--manifest-path', manifestPath,
-        ...extraFeatures, '--test', 'preagent_v2', '--', '--nocapture'];
+    const cargoArgs = ['test', '--offline', '--locked', '--manifest-path', manifestPath,
+      ...extraFeatures, ...cargoTestTarget(config.task), '--', '--nocapture'];
     const start = Date.now();
     const result = run('cargo', cargoArgs, scratch, TIMEOUT_MS, {CARGO_NET_OFFLINE: 'true'});
     const status = !result.error && !result.signal && result.code === 0 &&
@@ -206,4 +220,5 @@ function main(args) {
   }
 }
 if (require.main === module) main(process.argv.slice(2));
-module.exports = {safePath, configFor, snapshot, injectAcceptance, validateCandidate, grade};
+module.exports = {safePath, configFor, snapshot, injectAcceptance, cargoTestTarget,
+  validateCandidate, grade};

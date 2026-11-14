@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const cp = require('node:child_process');
-const {safePath, configFor, snapshot, injectAcceptance, validateCandidate} = require('./grade.cjs');
+const {safePath, configFor, snapshot, injectAcceptance, cargoTestTarget, validateCandidate} = require('./grade.cjs');
 
 function sandbox(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'preagent-grade-test-'));
@@ -128,6 +128,37 @@ test('withheld acceptance is injected only into grading copy', t => {
   injectAcceptance(output, config);
   assert.equal(fs.existsSync(path.join(output, 'tests', 'preagent_v2.rs')), true);
   assert.throws(() => injectAcceptance(output, config), /conflicting acceptance/);
+});
+
+test('withheld acceptance can extend a named existing integration target', t => {
+  const root = sandbox(t);
+  const fixture = path.join(root, 'acceptance.rs');
+  const input = path.join(root, 'input');
+  const output = path.join(root, 'copy');
+  fs.writeFileSync(fixture, '#[test] fn hidden_acceptance() {}');
+  fs.mkdirSync(path.join(input, 'tests'), {recursive: true});
+  fs.mkdirSync(output);
+  fs.writeFileSync(path.join(input, 'tests', 'lib.rs'), 'fn existing_suite() {}');
+  snapshot(input, output);
+  const config = {
+    task: {source_paths: ['tests/lib.rs'], acceptance_injection: 'integration_test_module',
+      acceptance_target: 'integration'},
+    acceptance: fixture, pkg: {manifest_path: 'Cargo.toml'}
+  };
+  injectAcceptance(output, config);
+  assert.equal(fs.readFileSync(path.join(input, 'tests', 'lib.rs'), 'utf8'), 'fn existing_suite() {}');
+  assert.match(fs.readFileSync(path.join(output, 'tests', 'lib.rs'), 'utf8'), /hidden_acceptance/);
+  assert.deepEqual(cargoTestTarget(config.task), ['--test', 'integration']);
+});
+
+test('integration acceptance target names are constrained by the fixture registry', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'candidates.json'), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'locks', 'catalog.json'), 'utf8'));
+  const task = manifest.cases.find(item => item.id === 'regex-utf8-boundary-tests');
+  task.controls = {clean: {status: 'acceptance_passed'}, seeded: {status: 'acceptance_failed'}};
+  assert.equal(configFor(task.id, manifest, catalog).task.acceptance_target, 'integration');
+  task.acceptance_target = '../outside';
+  assert.throws(() => configFor(task.id, manifest, catalog), /unsupported fixture configuration/);
 });
 
 test('candidate validation requires the exact root and pinned Git commit', t => {
