@@ -3,10 +3,10 @@ use regex_syntax::ast::parse::Parser;
 
 fn escaped_class_character(pattern: &str) -> char {
     let ast = Parser::new().parse(pattern).unwrap();
-    let Ast::ClassBracketed(class) = ast else {
+    let Ast::ClassBracketed(ref class) = ast else {
         panic!("expected a bracketed class")
     };
-    let ClassSet::Item(item) = class.kind else {
+    let ClassSet::Item(ref item) = class.kind else {
         panic!("expected a class item")
     };
     match item {
