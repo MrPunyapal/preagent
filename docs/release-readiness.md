@@ -1,8 +1,8 @@
 # v0.1.0 release-readiness checklist
 
-**Status: release candidate, not published.** No tag or GitHub release should
-be created until the remaining platform-specific checks have passed. Main CI
-artifacts may be used to verify the candidate in advance.
+**Status: release candidate, not published.** The Windows interactive-session
+checks passed on 2026-11-16 with the explicit local configuration below. Main
+CI artifacts may be used to verify the candidate before a release is authorized.
 
 ## Core scope
 
@@ -25,7 +25,7 @@ agreement with hand-authored labels does not establish coding-task success.
 - [x] Cross-platform test, lint, formatting and release binary builds in CI.
 - [x] Minimum supported Rust 1.74 CI test.
 - [x] Local Windows build, routing, Ollama and Codex flag checks documented
-      in `docs/windows-validation-2026-11-15.md`.
+      in `docs/windows-validation.md` (2026-11-16 follow-up).
 - [x] Separate experimental evaluation controls with verified green/red
       regression fixtures. Do not mistake these for agent success.
 - [x] Automated rejection of a release tag mismatched with Cargo.toml or
@@ -33,12 +33,12 @@ agreement with hand-authored labels does not establish coding-task success.
 - [x] Production-style release archive packaging exercised in regular
       Windows, Linux and macOS CI.
 
-## Remaining checks before publishing
+## Final candidate checks
 
-- [ ] On the latest main commit, test a **real interactive Codex session**
+- [x] On the release candidate code, test a **real interactive Codex session**
       using the installed Codex CLI and an explicitly approved available
       model/provider. No unexpected paid API charges.
-- [ ] Verify `run --prompt-file` with an actual interactive coding agent,
+- [x] Verify `run --prompt-file` with an actual interactive coding agent,
       including Ctrl+C, working directory, terminal I/O and exit status.
 - [x] Reconfirm the latest native Windows artifact and local Ollama routing
       fallback on 2026-11-16.
@@ -48,22 +48,25 @@ agreement with hand-authored labels does not establish coding-task success.
 - [x] Extract the latest Windows archive, verify its SHA-256 checksum and
       smoke-test its executable.
 - [x] Review the v0.1.0 tag candidate and release notes. Document the known
-      Codex/Ollama/model compatibility limit; do not create a tag or release
-      until the remaining interactive checks pass.
+      Codex/Ollama/model compatibility limit and its explicit workaround.
 
-The currently installed `qwen2.5-coder:1.5b` is not compatible with the
-interactive Codex TUI's default thinking request. A native Codex exec without
-reasoning effort succeeded, but does not satisfy the interactive-session gate.
-The actual prompt-file interactive check remains open until an approved,
-compatible local model is available. See the
+Codex CLI 0.154.0 with Ollama 0.32.5 and installed `qwen2.5-coder:1.5b`
+completed the native and Preagent interactive smoke sessions with explicit
+`--effort none`. The prompt-file session displayed the original multiline
+Unicode prompt, answered a second prompt entered through terminal stdin,
+cancelled an active turn on Ctrl+C, and exited with code 0 after another
+Ctrl+C. The sentinel file was unchanged, and no test agent process remained.
+This validates interactive launch and I/O, not coding-task success. See the
 [2026-11-16 Windows validation update](windows-validation.md#release-candidate-validation-2026-11-16).
 
-A prior local Windows test with Codex 0.154.0 and Ollama 0.32.5 using
-`qwen2.5-coder:1.5b` failed because of Codex/model compatibility. Preagent
-did not demonstrate an argument construction defect. The first release should
-not promise this exact integration works. Claude Code/OpenCode were absent
-on that Windows machine; their launchers are stub-tested but not proven with
-real interactive sessions.
+That model rejects the default thinking request and explicit `low` effort.
+Codex still reports an Ollama model-list response-shape warning and uses
+fallback model metadata. Other model/runtime combinations remain unverified.
+Claude Code and native OpenCode were unavailable; their launchers have only
+stub coverage on this machine. No model download or paid model was needed.
+
+The candidate's technical checks are complete once CI is green for the final
+commit. A release tag and GitHub Release still require separate authorization.
 
 ## Release procedure after machine-specific checks
 

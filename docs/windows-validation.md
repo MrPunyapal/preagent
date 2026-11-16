@@ -6,6 +6,61 @@ was created.
 
 ## Release candidate validation (2026-11-16)
 
+### Successful interactive follow-up
+
+Commit `44b4bce` fixes a missing Codex effort option: Preagent previously
+rejected explicit `--effort none`, although native Codex 0.154.0 accepts it.
+No effort is applied automatically. Regression coverage verifies exact config
+forwarding, unchanged default behavior, and rejection of `none` for Claude and
+OpenCode. The final local Windows checks passed: format, Clippy with warnings
+denied, 68 Rust tests (56 unit and 12 integration), and release build. All four
+release-script tests and the v0.1.0 version check also passed.
+
+Both native `codex exec` and the native interactive TUI completed a local
+`READY` prompt with `model_reasoning_effort="none"`. The TUI then exited
+with code 0 using `/quit`. The equivalent Preagent release binary was tested
+in a disposable Git repository:
+
+```text
+preagent run --no-git --oss --local-provider ollama --model qwen2.5-coder:1.5b --effort none --prompt-file prompt.txt
+```
+
+The prompt file contained multiline text, Chinese characters, an emoji,
+quotes, and shell-looking characters. Codex displayed the original text and
+answered `PREAGENT_READY`. A second prompt entered through the inherited
+terminal stdin returned `TERMINAL_READY`. Ctrl+C interrupted a further active
+turn with Codex's "Conversation interrupted" message; another Ctrl+C at idle
+shut it down. The wrapper recorded `PREAGENT_EXIT=0`. This is Codex's graceful
+interactive shutdown status, not a forced Windows console termination status.
+The TUI showed the disposable working directory. No test-model Codex or
+Preagent process remained after shutdown.
+
+The README sentinel's SHA-256 remained
+`856b9f7445114bdfd756ae2e9a7bc78948dcb811df47afec3d11c724315f1994`.
+The scratch directory contained only the original README and prompt, Git
+metadata, and exit-code files written by the validation wrapper. No agent file
+edits or tool actions were requested. These results verify session startup,
+prompt preservation, terminal I/O, cancellation, exit propagation and file
+safety for this smoke session; they do not measure coding-task performance.
+
+No new model, runtime installation, credential change or paid inference was
+needed. The tested versions remain Codex CLI 0.154.0 and Ollama 0.32.5 with
+installed `qwen2.5-coder:1.5b`. Its default/high or explicit low thinking
+requests still fail. Codex's model-list response-shape warning persists, but
+does not prevent this explicit no-reasoning session. The earlier conclusion
+that a different model was necessary was incomplete: the missing explicit
+effort option resolves this tested path.
+
+The Windows CI job on `44b4bce` passed and its development artifact
+([run 43926992408](https://github.com/MrPunyapal/preagent/actions/runs/43926992408),
+artifact `14255948141`) was downloaded and smoke-tested locally. Its archive
+contained only `preagent.exe`, matched its SHA-256 sidecar and the standalone
+binary, and passed version/help/doctor and explicit `--effort none` dry-run
+checks. The archive SHA-256 was
+`4d965706cb0a7e861ef85a8ac01af7cba1f1095e2ce0f46230f039c1e8490f2a`.
+
+### Initial validation pass
+
 The repository was clean before synchronization. `main` was safely fast-forwarded
 to `8ca2b5b4a6110f29e35bc22d68a4da8ac4972aa3`; no local changes were present.
 All requested Rust checks passed on Windows:
@@ -74,14 +129,11 @@ it fell back to model metadata and still issued the request. No file changes
 were made in the disposable repo. The direct `exec` success does not prove the
 interactive TUI works.
 
-The genuine interactive-agent and prompt-file checks remain blocked until a
-compatible, already-installed local model/provider is approved. No such
-compatible model was identified among the installed models, and no model was
-downloaded. The TUI accepted terminal input and shut down on Ctrl+C, but the
-requested successful coding-agent session and its final process status remain
-unverified.
+At this initial pass, successful interactive execution and the final process
+status had not been verified. The explicit `none` follow-up above resolves
+those checks using the same installed model.
 
-### Latest Windows development artifact and release gate
+### Initial Windows development artifact and release gate
 
 CI run [43921221254](https://github.com/MrPunyapal/preagent/actions/runs/43921221254)
 passed Minimum Rust 1.74 and the Linux, Windows and macOS jobs on commit
@@ -94,10 +146,10 @@ passed `--version`, `--help`, and `doctor --json` smoke tests.
 
 `node scripts/release-check.cjs tag v0.1.0` and all four
 `scripts/release-check.test.cjs` tests passed. The v0.1.0 version matches
-Cargo.toml and Cargo.lock. No Git tag or GitHub Release exists. The release
-checklist remains open only for successful real interactive Codex and
-prompt-file validation with a compatible approved local model; Claude Code
-and OpenCode are documented as unavailable and unverified.
+Cargo.toml and Cargo.lock. No Git tag or GitHub Release was created. The
+interactive and prompt-file checks left open by this pass are completed in the
+follow-up above. Claude Code and native OpenCode remain unavailable and
+unverified.
 
 ## Historical validation baseline (2026-11-11 and 2026-11-12)
 
