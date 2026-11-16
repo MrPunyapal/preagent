@@ -61,6 +61,18 @@ jobs:
         run: node --test scripts/release-check.test.cjs
       - name: Build
         run: cargo build --release --locked
+      - name: Smoke-test native release binary
+        shell: bash
+        run: |
+          exe="preagent"
+          if [[ "$RUNNER_OS" == 'Windows' ]]; then exe='preagent.exe'; fi
+          "./target/release/$exe" --help >/dev/null
+          "./target/release/$exe" doctor --json >/dev/null
+      - name: Test versioned archive packaging
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)"
+          bash scripts/package-release.sh "v$version"
       - name: Upload development binary
         uses: actions/upload-artifact@v4
         with:
@@ -68,4 +80,5 @@ jobs:
           path: |
             target/release/preagent
             target/release/preagent.exe
+            dist/*
           if-no-files-found: error
