@@ -33,8 +33,15 @@ shell interpolation or changing its whitespace:
 
 PowerShell users can use `Get-Content -Raw task.txt | preagent route --stdin`.
 Prompts from standard input are opt-in, must be valid UTF-8 and are limited to
-1 MiB. Do not combine `--stdin` with a positional prompt. The standard
-`run` command still inherits stdin for the native agent if `--stdin` is not used.
+1 MiB. For interactive agent sessions, prefer a prompt file instead:
+
+    preagent run --prompt-file task.txt
+    preagent route --prompt-file task.txt --json
+
+File input preserves the original UTF-8 prompt without consuming terminal
+stdin. Both prompt sources have the same 1 MiB limit and cannot be combined
+with a positional prompt or each other. Without `--stdin`, the normal
+`run` command inherits stdin for the native agent.
 
 
 Classify a request with no AI service:

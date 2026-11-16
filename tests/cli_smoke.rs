@@ -102,6 +102,39 @@ fn stdin_prompt_is_opt_in_preserves_exact_text_and_bounds_input() {
 }
 
 #[test]
+fn prompt_file_preserves_multiline_bytes_and_keeps_stdin_available() {
+    let scratch = Scratch::new();
+    let prompt = "  Fix \"登录\" 🦀\nsecond line ; not shell\n";
+    let path = scratch.0.join("task.txt");
+    std::fs::write(&path, prompt).unwrap();
+    let output = Command::new(env!("CARGO_BIN_EXE_preagent"))
+        .args(["run", "--dry-run", "--no-git", "--prompt-file", "task.txt"])
+        .current_dir(&scratch.0)
+        .stdin(Stdio::null())
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(String::from_utf8_lossy(&output.stdout).contains(&format!("{prompt:?}")));
+
+    let missing = Command::new(env!("CARGO_BIN_EXE_preagent"))
+        .args(["route", "--prompt-file", "missing.txt"])
+        .current_dir(&scratch.0)
+        .output()
+        .unwrap();
+    assert_eq!(missing.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&missing.stderr).contains("cannot open prompt file"));
+
+    std::fs::write(&path, vec![b'x'; 1024 * 1024 + 1]).unwrap();
+    let large = Command::new(env!("CARGO_BIN_EXE_preagent"))
+        .args(["route", "--prompt-file", "task.txt"])
+        .current_dir(&scratch.0)
+        .output()
+        .unwrap();
+    assert_eq!(large.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&large.stderr).contains("1 MiB limit"));
+}
+
+#[test]
 fn run_dry_run_does_not_need_codex_installed() {
     let output = preagent(&[
         "run",

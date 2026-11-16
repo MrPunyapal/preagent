@@ -160,23 +160,32 @@ fn main() -> ExitCode {
     }
 }
 
-const MAX_STDIN_BYTES: u64 = 1024 * 1024;
+const MAX_PROMPT_BYTES: u64 = 1024 * 1024;
 
 fn resolve_prompt(mut options: Options) -> Result<Options, String> {
-    if !options.stdin {
+    if !options.stdin && options.prompt_file.is_none() {
         return Ok(options);
     }
+    // File prompts leave the coding agent's interactive stdin untouched.
+    let (source, origin): (Box<dyn Read>, &str) = if let Some(path) = &options.prompt_file {
+        let file = std::fs::File::open(path)
+            .map_err(|error| format!("cannot open prompt file '{path}': {error}"))?;
+        (Box::new(file), "prompt file")
+    } else {
+        (Box::new(std::io::stdin()), "stdin prompt")
+    };
     let mut bytes = Vec::new();
-    std::io::stdin()
-        .take(MAX_STDIN_BYTES + 1)
+    source
+        .take(MAX_PROMPT_BYTES + 1)
         .read_to_end(&mut bytes)
-        .map_err(|error| format!("cannot read prompt from stdin: {error}"))?;
-    if bytes.len() as u64 > MAX_STDIN_BYTES {
-        return Err("stdin prompt exceeds 1 MiB limit".into());
+        .map_err(|error| format!("cannot read {origin}: {error}"))?;
+    if bytes.len() as u64 > MAX_PROMPT_BYTES {
+        return Err(format!("{origin} exceeds 1 MiB limit"));
     }
-    let prompt = String::from_utf8(bytes).map_err(|_| "stdin prompt must be valid UTF-8")?;
+    let prompt = String::from_utf8(bytes)
+        .map_err(|_| format!("{origin} must be valid UTF-8"))?;
     if prompt.trim().is_empty() {
-        return Err("a non-empty stdin prompt is required".into());
+        return Err(format!("a non-empty {origin} is required"));
     }
     options.prompt = prompt;
     Ok(options)

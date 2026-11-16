@@ -22,6 +22,7 @@ pub struct Options {
     pub agent: Agent,
     pub no_git: bool,
     pub stdin: bool,
+    pub prompt_file: Option<String>,
     pub json: bool,
     pub dry_run: bool,
     pub oss: bool,
@@ -47,10 +48,10 @@ pub enum Action {
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
 
 USAGE
-    preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] [--stdin] <prompt>
+    preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] [--stdin|--prompt-file PATH] [<prompt>]
     preagent run [--agent codex|claude|opencode] [--dry-run] [--oss]
                  [--local-provider ollama|lmstudio] [--model NAME]
-                 [--effort LEVEL] [--no-git] [--stdin] <prompt>
+                 [--effort LEVEL] [--no-git] [--stdin|--prompt-file PATH] [<prompt>]
     preagent eval [--json]
     preagent doctor [--json]
     preagent models [--json]
@@ -71,7 +72,8 @@ COMMANDS
 
 OPTIONS
     --json             Machine-readable route or evaluation output.
-    --stdin            Read the exact prompt from standard input (max 1 MiB).
+    --stdin            Read an exact UTF-8 prompt from stdin (max 1 MiB).
+    --prompt-file PATH Read an exact UTF-8 prompt from a file (max 1 MiB).
     --slm MODEL        Use installed Ollama model via loopback (route only).
     --slm-always       Consult SLM even on unambiguous prompts.
     --no-git           Do not inspect local Git metadata.
@@ -132,6 +134,9 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             }
             "--no-git" => options.no_git = true,
             "--stdin" => options.stdin = true,
+            "--prompt-file" if options.prompt_file.is_none() => {
+                options.prompt_file = Some(next_value(&mut args, "--prompt-file")?);
+            }
             "--slm" if !is_run => options.slm = Some(next_value(&mut args, "--slm")?),
             "--slm-always" if !is_run => options.slm_always = true,
             "--json" if !is_run => options.json = true,
@@ -157,11 +162,14 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
         }
     }
 
-    if options.stdin && !prompt_words.is_empty() {
-        return Err("--stdin cannot be combined with a positional prompt".into());
+    if options.stdin && options.prompt_file.is_some() {
+        return Err("--stdin and --prompt-file are mutually exclusive".into());
+    }
+    if (options.stdin || options.prompt_file.is_some()) && !prompt_words.is_empty() {
+        return Err("prompt sources cannot be combined with a positional prompt".into());
     }
     options.prompt = prompt_words.join(" ");
-    if !options.stdin && options.prompt.trim().is_empty() {
+    if !options.stdin && options.prompt_file.is_none() && options.prompt.trim().is_empty() {
         return Err("a non-empty prompt is required".to_string());
     }
     if is_run {
@@ -314,6 +322,16 @@ mod tests {
         assert!(parse_words(&["route", "extra", "--stdin"]).is_err());
         assert!(parse_words(&["route", "--stdin", "--", "extra"]).is_err());
         assert!(parse_words(&["run", "--stdin", "--", "--model"]).is_err());
+        let Action::Run(file) =
+            parse_words(&["run", "--prompt-file", "task.txt", "--agent", "claude"]).unwrap()
+        else {
+            panic!("expected file prompt");
+        };
+        assert_eq!(file.prompt_file.as_deref(), Some("task.txt"));
+        assert!(parse_words(&["run", "--prompt-file", "a.txt", "--stdin"]).is_err());
+        assert!(parse_words(&["route", "--prompt-file", "a.txt", "fix"]).is_err());
+        assert!(parse_words(&["route", "--prompt-file", "a.txt", "--prompt-file", "b.txt"]).is_err());
+        assert!(parse_words(&["run", "--prompt-file"]).is_err());
     }
 
     #[test]
