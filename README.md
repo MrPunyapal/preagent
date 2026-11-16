@@ -2,9 +2,10 @@
 
 An offline-first, open-source pre-agent for coding assistants.
 
-**Status: early Rust prototype.** This release provides deterministic, explainable
-task classification and a safe coding-agent CLI pass-through. It is not yet an automatic model router or a bundled SLM. Optional local
-Ollama classification is experimental and advisory.
+**Status: v0.1.0 release candidate (not yet published).** The CLI provides
+deterministic, explainable task classification and safe coding-agent execution
+pass-through. It is not yet an automatic model router or a bundled SLM.
+Optional local Ollama classification is experimental and advisory.
 
 ## Principles
 
@@ -184,10 +185,23 @@ Apache License 2.0. See [LICENSE](LICENSE).
 
 ## CI binaries and releases
 
-Every successful main-branch CI run uploads native Windows, Linux, and macOS
-executables under Actions artifacts. Choose the artifact matching your OS,
-extract it, and run preagent --help or preagent doctor.
+A successful [main-branch CI run](https://github.com/MrPunyapal/preagent/actions/workflows/ci.yml)
+provides tested Windows x64, Linux x64 and macOS ARM64 binaries with a
+versioned `.tar.gz` archive and `.sha256` checksum file for each platform.
+These are development artifacts; no GitHub Release has been published yet.
 
-Versioned releases are built from an explicitly pushed v-prefixed Git tag.
-Each release contains per-platform archives and SHA-256 checksums; the release
-workflow never needs API keys or a paid inference service.
+After the first tagged release, the same archives will appear on the
+[GitHub Releases page](https://github.com/MrPunyapal/preagent/releases).
+Extract the archive for your platform and run `preagent --version`,
+`preagent doctor` and `preagent route "Fix README typo"`. On Windows use
+`preagent.exe`. Download a matching checksum and verify it with
+`sha256sum -c ARCHIVE.sha256` (Linux/Windows Git Bash) or
+`shasum -a 256 -c ARCHIVE.sha256` (macOS). Archives are not code-signed
+or notarized, and the native coding agent must be installed separately.
+
+Only an explicitly pushed, version-matching `v*` tag can publish a release.
+The workflow tests the binary and validates all three complete platform
+archives and their checksums before publishing. It does not require a paid
+inference service. See the [0.1.0 release-readiness checklist](docs/release-readiness.md)
+and [changelog](CHANGELOG.md) for capabilities, known limitations and the
+remaining machine-specific checks.
