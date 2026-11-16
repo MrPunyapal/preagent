@@ -46,6 +46,8 @@ jobs:
         run: node --test evals/heldout/v2/grade.test.cjs
       - name: Validate held-out v2 reviewer submission schema
         run: node --test evals/heldout/v2/review/check-submission.test.cjs
+      - name: Verify release validation script
+        run: node --test scripts/release-check.test.cjs
       - name: Build
         run: cargo build --release --locked
       - name: Upload development binary
