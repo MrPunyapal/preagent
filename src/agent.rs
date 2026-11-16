@@ -1,5 +1,8 @@
 use crate::cli::{Agent, Options};
-use std::process::Command;
+use std::process::{Command, ExitStatus};
+
+#[cfg(unix)]
+use std::os::unix::process::ExitStatusExt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Invocation {
@@ -74,6 +77,16 @@ pub fn codex_invocation(options: &Options) -> Invocation {
     }
 }
 
+// A signalled Unix child has no numeric status. Preserve the usual
+// 128+signal convention so callers can distinguish Ctrl+C from exit 1.
+fn agent_exit_code(status: ExitStatus) -> i32 {
+    #[cfg(unix)]
+    if let Some(signal) = status.signal() {
+        return 128 + signal;
+    }
+    status.code().unwrap_or(1)
+}
+
 impl Invocation {
     pub fn display(&self) -> String {
         let mut parts = vec![self.executable.to_string()];
@@ -95,13 +108,21 @@ impl Invocation {
                 };
                 format!("failed to start {}: {error}{hint}", self.executable)
             })?;
-        Ok(status.code().unwrap_or(1))
+        Ok(agent_exit_code(status))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(unix)]
+    #[test]
+    fn signalled_agent_exit_uses_shell_convention() {
+        assert_eq!(agent_exit_code(ExitStatus::from_raw(2)), 130);
+        assert_eq!(agent_exit_code(ExitStatus::from_raw(15)), 143);
+        assert_eq!(agent_exit_code(ExitStatus::from_raw(7 << 8)), 7);
+    }
 
     #[test]
     fn preserves_prompt_as_single_argument() {
