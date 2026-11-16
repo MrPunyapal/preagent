@@ -40,16 +40,23 @@ agreement with hand-authored labels does not establish coding-task success.
       model/provider. No unexpected paid API charges.
 - [ ] Verify `run --prompt-file` with an actual interactive coding agent,
       including Ctrl+C, working directory, terminal I/O and exit status.
-- [ ] Reconfirm the latest native Windows artifact and local Ollama fallback,
-      especially after any runtime updates.
-- [ ] Test Claude Code and OpenCode with their own installed native executables
-      where practical. If unavailable, explicitly mark them unverified instead
-      of blocking unrelated release functionality.
-- [ ] Review Windows archive extraction, executable behavior and SHA-256
-      checksum against the latest main CI artifacts.
-- [ ] Review the exact version-tag candidate and release notes; decide if the
-      unsupported Codex/Ollama combination needs a documentation-only warning
-      or an engineering fix.
+- [x] Reconfirm the latest native Windows artifact and local Ollama routing
+      fallback on 2026-11-16.
+- [x] Check installed Claude Code and OpenCode executables. Claude is absent;
+      OpenCode is available only as a PowerShell script shim, so both remain
+      unverified as native agent launches.
+- [x] Extract the latest Windows archive, verify its SHA-256 checksum and
+      smoke-test its executable.
+- [x] Review the v0.1.0 tag candidate and release notes. Document the known
+      Codex/Ollama/model compatibility limit; do not create a tag or release
+      until the remaining interactive checks pass.
+
+The currently installed `qwen2.5-coder:1.5b` is not compatible with the
+interactive Codex TUI's default thinking request. A native Codex exec without
+reasoning effort succeeded, but does not satisfy the interactive-session gate.
+The actual prompt-file interactive check remains open until an approved,
+compatible local model is available. See the
+[2026-11-16 Windows validation update](windows-validation.md#release-candidate-validation-2026-11-16).
 
 A prior local Windows test with Codex 0.154.0 and Ollama 0.32.5 using
 `qwen2.5-coder:1.5b` failed because of Codex/model compatibility. Preagent

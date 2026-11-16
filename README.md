@@ -113,6 +113,13 @@ routing. Cloud Codex execution may require paid access. The --oss flag
 supports a fully local path when the selected provider and model are
 actually running on your computer; some runtimes also expose cloud models.
 
+Known compatibility limit: on the Windows validation machine, Codex CLI
+0.154.0 with Ollama 0.32.5 and `qwen2.5-coder:1.5b` failed in Codex's
+interactive TUI because that model does not support Codex's default thinking
+request. Native `codex exec` without a reasoning-effort setting did answer a
+local prompt, but that does not verify interactive sessions. Verify a model
+and effort directly with the native Codex CLI before relying on this pairing.
+
 ## Router behavior
 
 The baseline reads the prompt and a bounded list of Git tracked changed-file
