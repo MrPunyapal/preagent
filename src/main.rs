@@ -8,6 +8,7 @@ mod router;
 mod slm;
 
 use cli::{Action, Options};
+use std::io::Read;
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
@@ -30,6 +31,13 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Action::Route(options) => {
+            let options = match resolve_prompt(options) {
+                Ok(options) => options,
+                Err(error) => {
+                    eprintln!("preagent: {error}");
+                    return ExitCode::from(2);
+                }
+            };
             let ctx = context::discover(!options.no_git);
             let decision = router::classify(&options.prompt, &ctx);
             let mut status = "not_requested";
@@ -81,7 +89,13 @@ fn main() -> ExitCode {
             }
             ExitCode::SUCCESS
         }
-        Action::Run(options) => run(options),
+        Action::Run(options) => match resolve_prompt(options) {
+            Ok(options) => run(options),
+            Err(error) => {
+                eprintln!("preagent: {error}");
+                ExitCode::from(2)
+            }
+        },
         Action::Heldout(command) => match heldout::run(command) {
             Ok(report) => {
                 println!("{report}");
@@ -144,6 +158,28 @@ fn main() -> ExitCode {
             }
         },
     }
+}
+
+const MAX_STDIN_BYTES: u64 = 1024 * 1024;
+
+fn resolve_prompt(mut options: Options) -> Result<Options, String> {
+    if !options.stdin {
+        return Ok(options);
+    }
+    let mut bytes = Vec::new();
+    std::io::stdin()
+        .take(MAX_STDIN_BYTES + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|error| format!("cannot read prompt from stdin: {error}"))?;
+    if bytes.len() as u64 > MAX_STDIN_BYTES {
+        return Err("stdin prompt exceeds 1 MiB limit".into());
+    }
+    let prompt = String::from_utf8(bytes).map_err(|_| "stdin prompt must be valid UTF-8")?;
+    if prompt.trim().is_empty() {
+        return Err("a non-empty stdin prompt is required".into());
+    }
+    options.prompt = prompt;
+    Ok(options)
 }
 
 fn run(options: Options) -> ExitCode {

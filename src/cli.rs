@@ -21,6 +21,7 @@ pub struct Options {
     pub prompt: String,
     pub agent: Agent,
     pub no_git: bool,
+    pub stdin: bool,
     pub json: bool,
     pub dry_run: bool,
     pub oss: bool,
@@ -46,10 +47,10 @@ pub enum Action {
 pub const HELP: &str = "preagent - offline-first pre-agent for coding assistants
 
 USAGE
-    preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] <prompt>
+    preagent route [--json] [--no-git] [--slm MODEL] [--slm-always] [--stdin] <prompt>
     preagent run [--agent codex|claude|opencode] [--dry-run] [--oss]
                  [--local-provider ollama|lmstudio] [--model NAME]
-                 [--effort LEVEL] [--no-git] <prompt>
+                 [--effort LEVEL] [--no-git] [--stdin] <prompt>
     preagent eval [--json]
     preagent doctor [--json]
     preagent models [--json]
@@ -70,6 +71,7 @@ COMMANDS
 
 OPTIONS
     --json             Machine-readable route or evaluation output.
+    --stdin            Read the exact prompt from standard input (max 1 MiB).
     --slm MODEL        Use installed Ollama model via loopback (route only).
     --slm-always       Consult SLM even on unambiguous prompts.
     --no-git           Do not inspect local Git metadata.
@@ -129,6 +131,7 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
                 break;
             }
             "--no-git" => options.no_git = true,
+            "--stdin" => options.stdin = true,
             "--slm" if !is_run => options.slm = Some(next_value(&mut args, "--slm")?),
             "--slm-always" if !is_run => options.slm_always = true,
             "--json" if !is_run => options.json = true,
@@ -154,8 +157,11 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
         }
     }
 
+    if options.stdin && !prompt_words.is_empty() {
+        return Err("--stdin cannot be combined with a positional prompt".into());
+    }
     options.prompt = prompt_words.join(" ");
-    if options.prompt.trim().is_empty() {
+    if !options.stdin && options.prompt.trim().is_empty() {
         return Err("a non-empty prompt is required".to_string());
     }
     if is_run {
@@ -291,6 +297,23 @@ mod tests {
         ));
         assert!(parse_words(&["heldout", "route", "--slm"]).is_err());
         assert!(parse_words(&["heldout", "grade", "task"]).is_err());
+    }
+
+    #[test]
+    fn stdin_is_explicit_and_exclusive_with_positional_prompt() {
+        let Action::Run(options) = parse_words(&["run", "--stdin", "--no-git"]).unwrap() else {
+            panic!("expected run");
+        };
+        assert!(options.stdin);
+        assert!(options.prompt.is_empty());
+        let Action::Route(options) = parse_words(&["route", "--stdin", "--json"]).unwrap() else {
+            panic!("expected route");
+        };
+        assert!(options.stdin);
+        assert!(parse_words(&["run", "--stdin", "extra"]).is_err());
+        assert!(parse_words(&["route", "extra", "--stdin"]).is_err());
+        assert!(parse_words(&["route", "--stdin", "--", "extra"]).is_err());
+        assert!(parse_words(&["run", "--stdin", "--", "--model"]).is_err());
     }
 
     #[test]

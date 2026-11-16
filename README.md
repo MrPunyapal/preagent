@@ -25,6 +25,18 @@ Install Rust 1.74+ and Cargo. Build and test with:
 
 ## Usage
 
+Pipe a multiline prompt into the classifier or an installed agent without
+shell interpolation or changing its whitespace:
+
+    cat task.txt | preagent route --stdin --no-git
+    cat task.txt | preagent run --stdin --dry-run
+
+PowerShell users can use `Get-Content -Raw task.txt | preagent route --stdin`.
+Prompts from standard input are opt-in, must be valid UTF-8 and are limited to
+1 MiB. Do not combine `--stdin` with a positional prompt. The standard
+`run` command still inherits stdin for the native agent if `--stdin` is not used.
+
+
 Classify a request with no AI service:
 
     cargo run -- route "Fix authentication redirect"
