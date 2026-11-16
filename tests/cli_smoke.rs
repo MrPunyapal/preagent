@@ -113,7 +113,11 @@ fn prompt_file_preserves_multiline_bytes_and_keeps_stdin_available() {
         .stdin(Stdio::null())
         .output()
         .unwrap();
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert!(String::from_utf8_lossy(&output.stdout).contains(&format!("{prompt:?}")));
 
     let missing = Command::new(env!("CARGO_BIN_EXE_preagent"))

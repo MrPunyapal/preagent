@@ -182,8 +182,7 @@ fn resolve_prompt(mut options: Options) -> Result<Options, String> {
     if bytes.len() as u64 > MAX_PROMPT_BYTES {
         return Err(format!("{origin} exceeds 1 MiB limit"));
     }
-    let prompt = String::from_utf8(bytes)
-        .map_err(|_| format!("{origin} must be valid UTF-8"))?;
+    let prompt = String::from_utf8(bytes).map_err(|_| format!("{origin} must be valid UTF-8"))?;
     if prompt.trim().is_empty() {
         return Err(format!("a non-empty {origin} is required"));
     }

@@ -330,7 +330,9 @@ mod tests {
         assert_eq!(file.prompt_file.as_deref(), Some("task.txt"));
         assert!(parse_words(&["run", "--prompt-file", "a.txt", "--stdin"]).is_err());
         assert!(parse_words(&["route", "--prompt-file", "a.txt", "fix"]).is_err());
-        assert!(parse_words(&["route", "--prompt-file", "a.txt", "--prompt-file", "b.txt"]).is_err());
+        assert!(
+            parse_words(&["route", "--prompt-file", "a.txt", "--prompt-file", "b.txt"]).is_err()
+        );
         assert!(parse_words(&["run", "--prompt-file"]).is_err());
     }
 
