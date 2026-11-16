@@ -193,7 +193,9 @@ pub fn parse(args: impl IntoIterator<Item = String>) -> Result<Action, String> {
             let levels: &[&str] = if options.agent == Agent::Claude {
                 &["low", "medium", "high", "xhigh", "max", "ultracode"]
             } else {
-                &["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]
+                &[
+                    "none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra",
+                ]
             };
             if !levels.contains(&effort.as_str()) {
                 return Err(format!(

@@ -162,6 +162,47 @@ fn rejects_invalid_flags() {
 }
 
 #[test]
+fn codex_none_effort_is_explicit_and_agent_specific() {
+    let output = preagent(&[
+        "run",
+        "--dry-run",
+        "--no-git",
+        "--oss",
+        "--local-provider",
+        "ollama",
+        "--model",
+        "installed-model",
+        "--effort",
+        "none",
+        "Fix README typo",
+    ]);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains(r#""-c" "model_reasoning_effort=\"none\"""#));
+    assert!(stdout.contains("No agent was started"));
+
+    let default = preagent(&["run", "--dry-run", "--no-git", "Fix README typo"]);
+    assert!(default.status.success());
+    assert!(!String::from_utf8_lossy(&default.stdout).contains("model_reasoning_effort="));
+    for agent in ["claude", "opencode"] {
+        let rejected = preagent(&[
+            "run",
+            "--dry-run",
+            "--agent",
+            agent,
+            "--effort",
+            "none",
+            "Fix README typo",
+        ]);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+}
+
+#[test]
 fn native_agent_processes_preserve_arguments_cwd_stdio_and_exit_codes() {
     let scratch = Scratch::new();
     let stub = scratch

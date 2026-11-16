@@ -13,6 +13,8 @@ unpublished v0.1.0 release candidate; no GitHub release exists yet.
   both are opt-in and never download a model.
 - Native Codex, Claude Code and OpenCode launch commands with explicit
   agent/model/effort overrides and unchanged prompt forwarding.
+- Explicit Codex `--effort none` for models that do not support reasoning;
+  no effort override is applied by default.
 - Exact prompt input from a positional argument, bounded UTF-8 stdin or a
   local UTF-8 prompt file. File input leaves interactive stdin available.
 - `doctor`, JSON output for machine-readable inspection, and a routing
