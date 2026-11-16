@@ -8,6 +8,17 @@ permissions:
   contents: read
 
 jobs:
+  msrv:
+    name: Minimum supported Rust (1.74.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.74.0'
+      - name: Verify library and CLI on minimum Rust
+        run: cargo +1.74.0 test --all-targets --locked
+
   test:
     name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
