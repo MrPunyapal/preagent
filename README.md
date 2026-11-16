@@ -93,7 +93,8 @@ explicitly selected, and agent-specific arguments are validated. No new
 provider authentication or API credentials are requested by Preagent.
 
 On Windows, install a native agent `.exe` on PATH. Shell-only `.cmd`/`.bat`
-launchers (including some npm shims) are not launched; Preagent never routes
+launchers (including some npm shims) are not launched; Preagent resolves a
+native `.exe` explicitly before execution and never routes
 your prompt through a shell. `doctor` checks for native executables.
 Effort support depends on the selected agent version and model; an accepted
 Preagent label does not guarantee the provider supports that level.

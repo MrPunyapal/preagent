@@ -97,7 +97,20 @@ impl Invocation {
     }
 
     pub fn execute(&self) -> Result<i32, String> {
-        let status = Command::new(self.executable)
+        // Resolve the native executable explicitly on Windows. Rust may invoke
+        // .bat/.cmd files through cmd.exe; developer prompts must never reach
+        // a batch-file trampoline.
+        #[cfg(windows)]
+        let executable = crate::doctor::native_executable(self.executable).ok_or_else(|| {
+            format!(
+                "failed to start {}: native .exe not found on PATH (.cmd/.bat shims are not launched)",
+                self.executable
+            )
+        })?;
+        #[cfg(not(windows))]
+        let executable = self.executable;
+
+        let status = Command::new(executable)
             .args(&self.arguments)
             .status()
             .map_err(|error| {

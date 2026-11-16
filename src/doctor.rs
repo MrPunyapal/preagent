@@ -1,7 +1,8 @@
 //! Local diagnostics: inspect PATH without executing providers or sending data.
 use std::env;
 use std::net::{SocketAddr, TcpStream};
-use std::path::Path;
+#[cfg(windows)]
+use std::path::PathBuf;
 use std::time::Duration;
 
 pub struct Diagnostics {
@@ -12,17 +13,28 @@ pub struct Diagnostics {
     ollama: bool,
 }
 
+#[cfg(windows)]
+pub(crate) fn native_executable(name: &str) -> Option<PathBuf> {
+    // Reuse the same .exe-only PATH check for diagnostics and execution.
+    // A .cmd/.bat shim must never receive an untrusted coding prompt.
+    let path = env::var_os("PATH")?;
+    env::split_paths(&path)
+        .map(|directory| directory.join(format!("{name}.exe")))
+        .find(|candidate| candidate.is_file())
+}
+
 fn executable_exists(name: &str) -> bool {
-    let Some(path) = env::var_os("PATH") else {
-        return false;
-    };
-    let suffixes: &[&str] = if cfg!(windows) { &[".exe"] } else { &[""] };
-    env::split_paths(&path).any(|directory| {
-        suffixes.iter().any(|suffix| {
-            let candidate = directory.join(format!("{name}{suffix}"));
-            Path::new(&candidate).is_file()
-        })
-    })
+    #[cfg(windows)]
+    {
+        native_executable(name).is_some()
+    }
+    #[cfg(not(windows))]
+    {
+        let Some(path) = env::var_os("PATH") else {
+            return false;
+        };
+        env::split_paths(&path).any(|directory| directory.join(name).is_file())
+    }
 }
 
 pub fn check() -> Diagnostics {

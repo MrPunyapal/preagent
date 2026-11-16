@@ -186,6 +186,14 @@ fn native_agent_processes_preserve_arguments_cwd_stdio_and_exit_codes() {
         )
         .unwrap();
     }
+    #[cfg(windows)]
+    for agent in ["codex", "claude", "opencode"] {
+        std::fs::write(
+            scratch.0.join(format!("{agent}.cmd")),
+            "@echo off\r\necho wrong-launcher > launched-batch.txt\r\n",
+        )
+        .unwrap();
+    }
     let mut paths = vec![scratch.0.clone()];
     paths.extend(std::env::split_paths(
         &std::env::var_os("PATH").unwrap_or_default(),
@@ -422,4 +430,26 @@ fn heldout_pilot_is_separate_from_smoke_and_has_no_agent_outcome() {
 
     let unknown = preagent(&["heldout", "prepare", "not-a-task", ".", "not-created"]);
     assert!(!unknown.status.success());
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_rejects_batch_shims_without_a_native_executable() {
+    let scratch = Scratch::new();
+    for extension in ["cmd", "bat"] {
+        std::fs::write(
+            scratch.0.join(format!("codex.{extension}")),
+            "@echo off\r\necho executed > launched-batch.txt\r\n",
+        )
+        .unwrap();
+    }
+    let output = Command::new(env!("CARGO_BIN_EXE_preagent"))
+        .args(["run", "--no-git", "Fix bug & echo unsafe"])
+        .env("PATH", &scratch.0)
+        .current_dir(&scratch.0)
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(1));
+    assert!(!scratch.0.join("launched-batch.txt").exists());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("native .exe not found on PATH"));
 }
